@@ -1,0 +1,17 @@
+[package]
+name = "langfuse-queue"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+langfuse-core = { path = "../langfuse-core" }
+langfuse-db = { path = "../langfuse-db" }
+sqlx.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+anyhow.workspace = true
+async-trait.workspace = true

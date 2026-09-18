@@ -1,0 +1,20 @@
+[package]
+name = "langfuse-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+thiserror.workspace = true
+utoipa.workspace = true
+rust_decimal.workspace = true
+dotenvy.workspace = true
+# API key secret hashing, shared by key creation (langfuse-db) and
+# verification (langfuse-auth).
+bcrypt.workspace = true
+sha2.workspace = true
+hex.workspace = true

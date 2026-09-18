@@ -1,0 +1,116 @@
+[package]
+name = "langfuse"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+langfuse-core = { path = "crates/langfuse-core" }
+langfuse-db = { path = "crates/langfuse-db" }
+langfuse-queue = { path = "crates/langfuse-queue" }
+langfuse-ingestion = { path = "crates/langfuse-ingestion" }
+langfuse-auth = { path = "crates/langfuse-auth" }
+langfuse-webhooks = { path = "crates/langfuse-webhooks" }
+langfuse-api = { path = "crates/langfuse-api" }
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+dotenvy.workspace = true
+anyhow.workspace = true
+sqlx.workspace = true
+
+[workspace]
+members = [
+    "crates/langfuse-core",
+    "crates/langfuse-db",
+    "crates/langfuse-queue",
+    "crates/langfuse-ingestion",
+    "crates/langfuse-auth",
+    "crates/langfuse-webhooks",
+    "crates/langfuse-api",
+]
+resolver = "2"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+# HTTP framework
+axum = "0.8"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace", "catch-panic", "decompression-gzip"] }
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls", "postgres", "uuid", "chrono", "migrate", "rust_decimal"] }
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Validation
+validator = { version = "0.20", features = ["derive"] }
+# JWT
+jsonwebtoken = "9"
+# Parsing/serialising the UI session cookie. `Set-Cookie` has enough footguns
+# (attribute ordering, `__Host-` prefix rules, quoting) that building the header
+# with `format!` is not worth the risk.
+cookie = "0.18"
+# Password hashing
+bcrypt = "0.16"
+argon2 = "0.5"
+# SHA-256 for API key fast hash
+sha2 = "0.10"
+hex = "0.4"
+# UUID
+uuid = { version = "1", features = ["v4", "v7", "serde"] }
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+# OpenAPI
+utoipa = { version = "5", features = ["axum_extras", "chrono", "uuid"] }
+utoipa-swagger-ui = { version = "8", features = ["axum"] }
+# Error handling
+thiserror = "2"
+anyhow = "1"
+# Tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "fmt"] }
+tracing-opentelemetry = "0.29"
+opentelemetry = "0.28"
+opentelemetry_sdk = { version = "0.28", features = ["rt-tokio"] }
+opentelemetry-otlp = { version = "0.28", features = ["tonic"] }
+# OTLP/HTTP wire format decoder for POST /api/public/otel/v1/traces.
+# `gen-tonic-messages` generates only the prost message types (no tonic gRPC
+# service layer); `with-serde` adds the OTLP/JSON mapping, so the endpoint
+# accepts both `application/x-protobuf` (what every OTLP exporter sends) and
+# `application/json` (what curl debugging and the upstream test suite send).
+opentelemetry-proto = { version = "0.28", default-features = false, features = ["gen-tonic-messages", "with-serde", "trace"] }
+# Protobuf runtime for decoding OTLP requests and encoding OTLP responses.
+prost = "0.13"
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+# Config
+dotenvy = "0.15"
+# Email
+lettre = { version = "0.11", features = ["tokio1-native-tls", "builder"] }
+# Async trait
+async-trait = "0.1"
+# Once cell
+once_cell = "1"
+# Decimal support
+rust_decimal = { version = "1", features = ["serde", "postgres"] }
+# Stream
+futures = "0.3"
+tokio-stream = "0.1"
+# Logging
+log = "0.4"
+# Base64
+base64 = "0.22"
+# Model price matching (`models.match_pattern` is a regex)
+regex = "1"
+
+# ---- Binary targets ----
+[[bin]]
+name = "worker"
+path = "bin/worker.rs"
+
+[[bin]]
+name = "server"
+path = "bin/server.rs"
+
+[patch.crates-io]
+# Allow for local overrides if needed

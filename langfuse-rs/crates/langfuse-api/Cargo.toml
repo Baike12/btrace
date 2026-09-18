@@ -1,0 +1,41 @@
+[package]
+name = "langfuse-api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+langfuse-core = { path = "../langfuse-core" }
+langfuse-db = { path = "../langfuse-db" }
+langfuse-auth = { path = "../langfuse-auth" }
+cookie.workspace = true
+axum.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+sqlx.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+anyhow.workspace = true
+utoipa.workspace = true
+utoipa-swagger-ui.workspace = true
+langfuse-queue = { path = "../langfuse-queue" }
+langfuse-ingestion = { path = "../langfuse-ingestion" }
+langfuse-webhooks = { path = "../langfuse-webhooks" }
+bcrypt.workspace = true
+sha2.workspace = true
+hex.workspace = true
+# Model prices are numeric(65,30) in PostgreSQL.
+rust_decimal.workspace = true
+opentelemetry-proto.workspace = true
+prost.workspace = true
+# Decoding base64 span/trace ids in OTLP/JSON bodies.
+base64.workspace = true
+
+[dev-dependencies]
+# gzip-compressing request bodies, to exercise the Content-Encoding path every
+# OTLP exporter uses by default.
+flate2 = "1"
+base64.workspace = true

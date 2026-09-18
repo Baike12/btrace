@@ -1,0 +1,20 @@
+[package]
+name = "langfuse-ingestion"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+langfuse-core = { path = "../langfuse-core" }
+langfuse-db = { path = "../langfuse-db" }
+langfuse-queue = { path = "../langfuse-queue" }
+sqlx.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+anyhow.workspace = true
+async-trait.workspace = true
+uuid.workspace = true
+rust_decimal.workspace = true
+regex.workspace = true

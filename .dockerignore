@@ -1,0 +1,46 @@
+# Keep the build context to sources only — the image builds both the Rust
+# workspace and the pnpm workspace from scratch, so host build artifacts must
+# not leak in (a host-built `node_modules` or `target/` would be the wrong
+# platform and would shadow the in-image build).
+.git
+.github
+.agents
+.claude
+.codex
+.cursor
+.vscode
+.playwright-cli
+.turbo
+
+# Dependencies and build output
+**/node_modules
+**/dist
+**/.next
+**/.next-check
+langfuse-rs/target
+packages/shared/prisma/generated
+
+# Documentation and design-time artifacts
+docs
+fern
+generated
+specs
+*.md
+!web/**/*.md
+*.png
+*.jpg
+
+# NOTE: `patches/` is a build input — pnpm applies these from
+# patchedDependencies during `pnpm install`, so it must stay in the context.
+
+# Local configuration and secrets — never bake into an image
+.env
+.env.*
+!.env.example
+.env.dev.example
+
+# Test output
+coverage
+**/*.tsbuildinfo
+**/test-results
+**/playwright-report

@@ -1,0 +1,130 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+migrate
+/.pnpm-store
+
+# testing
+/coverage
+**/coverage/
+/certs/
+
+# database
+/prisma/db.sqlite
+/prisma/db.sqlite-journal
+
+# next.js
+/.next/
+/.next-check/
+/out/
+next-env.d.ts
+
+# production
+/build
+
+# Rust build artifacts
+langfuse-rs/target/
+
+# Playwright browser cache
+.playwright-cli/
+.playwright-mcp/
+
+# claude worktrees
+.claude/worktrees
+
+# idea
+.idea
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.eslintcache
+
+# local env files
+# do not commit any .env files to git, except for the .env.example file. https://create.t3.gg/en/usage/env-variables#using-environment-variables
+.env*
+!.env.dev.example
+!.env.prod.example
+!.env.test.example
+# The Rust backend's own template. `.env*` above matches it, so without this
+# negation the file that documents the backend's required variables can never
+# be committed.
+!langfuse-rs/.env.example
+
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
+# python
+__pycache__/
+*.py[cod]
+
+/generated
+
+# openapi spec that is copied during build
+/public/openapi*.yml
+
+# Ad-hoc verification screenshots dumped at the repo root. Kept on disk, but
+# they are not project assets and nothing references them.
+/*.png
+
+# claude meta files
+.claude/tsc-cache
+
+# vscode
+node_modules
+**/node_modules
+**/dist
+**/.next/*
+**/.next-check/*
+**/.turbo/*
+.yarn
+.turbo
+
+web/test-results/*
+.codex-artifacts/
+
+# Local DeepSec workspace and generated scan state
+.deepsec/
+
+.mcp.json
+.claude/settings.json
+.claude/skills/
+.claude/launch.json
+.cursor/mcp.json
+.cursor/environment.json
+.vscode/mcp.json
+.codex/config.toml
+.codex/environments/environment.toml
+
+# local config files
+*.local.*
+
+# claude meta files
+.claude/tsc-cache
+.claude/worktrees
+
+# Refactoring planning files (local only)
+**/.refactor/
+**/.pi-lens/
+
+# Serena MCP server config (local only)
+.serena/
+
+# Local overrides for AGENTS.md
+**/AGENTS.override.md
+
+# Superset config
+.superset/
