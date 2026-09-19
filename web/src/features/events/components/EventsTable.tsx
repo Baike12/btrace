@@ -508,7 +508,6 @@ export default function ObservationsEventsTable({
   const {
     observations,
     totalCount,
-    handleAddToAnnotationQueue,
     dataUpdatedAt,
     ioLoading,
     isSilencedError,
@@ -639,17 +638,6 @@ export default function ObservationsEventsTable({
           } as TableAction,
         ]
       : []),
-    {
-      id: ActionId.ObservationAddToAnnotationQueue,
-      type: BatchActionType.Create,
-      label: "Add to Annotation Queue",
-      description: "Add selected observations to an annotation queue.",
-      targetLabel: "Annotation Queue",
-      execute: handleAddToAnnotationQueue,
-      accessCheck: {
-        scope: "annotationQueues:CUD",
-      },
-    },
     {
       id: ActionId.ObservationAddToDataset,
       type: BatchActionType.Create,

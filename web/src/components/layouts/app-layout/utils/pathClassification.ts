@@ -9,13 +9,7 @@ export const PATH_CONSTANTS = {
     "/auth/reset-password",
     "/auth/setup-password",
   ] as const,
-  unauthenticated: [
-    "/auth/sign-in",
-    "/auth/sign-up",
-    "/auth/sso-initiate",
-    "/auth/error",
-    "/auth/hf-spaces",
-  ] as const,
+  unauthenticated: ["/auth/sign-in", "/auth/sign-up", "/auth/error"] as const,
   publishable: [
     "/project/[projectId]/sessions/[sessionId]",
     "/project/[projectId]/traces/[traceId]",

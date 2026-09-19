@@ -11,7 +11,6 @@ import { SidebarProvider, SidebarInset } from "@/src/components/ui/sidebar";
 import { AppSidebar } from "@/src/components/nav/app-sidebar";
 import { Toaster } from "@/src/components/ui/sonner";
 import { TopBannerProvider } from "@/src/features/top-banner";
-import { AppContentWithRightDrawer } from "../right-drawer/AppContentWithRightDrawer";
 import { ThemeToggle } from "@/src/features/theming/ThemeToggle";
 import {
   getAvailableCloudRegionOptions,
@@ -28,16 +27,6 @@ const CommandMenu = dynamic(
   () =>
     import("@/src/features/command-k-menu/CommandMenu").then((mod) => ({
       default: mod.CommandMenu,
-    })),
-  {
-    ssr: false,
-  },
-);
-
-const PaymentBanner = dynamic(
-  () =>
-    import("@/src/features/payment-banner").then((mod) => ({
-      default: mod.PaymentBanner,
     })),
   {
     ssr: false,
@@ -188,7 +177,6 @@ export function AuthenticatedLayout({
       <TopBannerProvider>
         <SidebarProvider>
           <div className="flex h-dvh w-full flex-col">
-            <PaymentBanner />
             <V4EnabledBanner />
             <V4PromoBanner />
             <div className="pt-banner-offset flex min-h-0 flex-1">
@@ -198,9 +186,7 @@ export function AuthenticatedLayout({
                 userNavProps={userNavProps}
               />
               <SidebarInset className="h-screen-with-banner max-w-full md:peer-data-[state=collapsed]:w-[calc(100vw-var(--sidebar-width-icon))] md:peer-data-[state=expanded]:w-[calc(100vw-var(--sidebar-width))]">
-                <AppContentWithRightDrawer>
-                  {children}
-                </AppContentWithRightDrawer>
+                {children}
                 <Toaster visibleToasts={1} />
                 <CommandMenu mainNavigation={navigation.navigation} />
               </SidebarInset>

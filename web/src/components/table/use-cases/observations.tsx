@@ -42,7 +42,6 @@ import {
   BatchExportTableName,
   type ObservationType,
   TableViewPresetTableName,
-  AnnotationQueueObjectType,
   BatchActionType,
   ActionId,
   type TimeFilter,
@@ -85,7 +84,6 @@ import { useTableViewManager } from "@/src/components/table/table-view-presets/h
 import { useRouter } from "next/router";
 import { useFullTextSearch } from "@/src/components/table/use-cases/useFullTextSearch";
 import { TableSelectionManager } from "@/src/features/table/components/TableSelectionManager";
-import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { TableActionMenu } from "@/src/features/table/components/TableActionMenu";
 import { type TableAction } from "@/src/features/table/types";
 import { type DataTablePeekViewProps } from "@/src/components/table/peek";
@@ -558,19 +556,6 @@ export default function ObservationsTable({
   });
   const totalCount = totalCountQuery.data?.totalCount ?? null;
 
-  const addToQueueMutation = api.annotationQueueItems.createMany.useMutation({
-    onSuccess: (data) => {
-      showSuccessToast({
-        title: "Observations added to queue",
-        description: `Selected observations will be added to queue "${data.queueName}". This may take a minute.`,
-        link: {
-          href: `/project/${projectId}/annotation-queues/${data.queueId}`,
-          text: `View queue "${data.queueName}"`,
-        },
-      });
-    },
-  });
-
   useEffect(() => {
     if (generations.isSuccess) {
       setDetailPageList(
@@ -606,45 +591,7 @@ export default function ObservationsTable({
     selectionStore: observationsTableStore,
   });
 
-  const handleAddToAnnotationQueue = async ({
-    projectId,
-    targetId,
-  }: {
-    projectId: string;
-    targetId: string;
-  }) => {
-    const {
-      actions,
-      selectAll,
-      selectedPageRowIds: selectedGenerationIds,
-    } = observationsTableStore.getState();
-
-    await addToQueueMutation.mutateAsync({
-      projectId,
-      objectIds: selectedGenerationIds,
-      objectType: AnnotationQueueObjectType.OBSERVATION,
-      queueId: targetId,
-      isBatchAction: selectAll,
-      query: {
-        filter: backendFilterState,
-        orderBy: orderByState,
-      },
-    });
-    actions.clearSelection();
-  };
-
   const tableActions: TableAction[] = [
-    {
-      id: ActionId.ObservationAddToAnnotationQueue,
-      type: BatchActionType.Create,
-      label: "Add to Annotation Queue",
-      description: "Add selected observations to an annotation queue.",
-      targetLabel: "Annotation Queue",
-      execute: handleAddToAnnotationQueue,
-      accessCheck: {
-        scope: "annotationQueues:CUD",
-      },
-    },
     {
       id: ActionId.ObservationAddToDataset,
       type: BatchActionType.Create,

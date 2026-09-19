@@ -30,9 +30,6 @@ import {
   type FilterState,
   BatchExportTableName,
   TableViewPresetTableName,
-  AnnotationQueueObjectType,
-  BatchActionType,
-  ActionId,
   type TimeFilter,
 } from "@langfuse/shared";
 import { useDetailPageLists } from "@/src/features/navigate-detail-pages/context";
@@ -59,7 +56,6 @@ import { useSelectAll } from "@/src/features/table/hooks/useSelectAll";
 import { type TableAction } from "@/src/features/table/types";
 import { TableActionMenu } from "@/src/features/table/components/TableActionMenu";
 import { type RowSelectionState } from "@tanstack/react-table";
-import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { TableSelectionManager } from "@/src/features/table/components/TableSelectionManager";
 import { useScoreColumns } from "@/src/features/scores/hooks/useScoreColumns";
 import { scoreFilters } from "@/src/features/scores/lib/scoreColumns";
@@ -328,19 +324,6 @@ export default function SessionsTable({
     ? sessionCountQueryV4
     : sessionCountQueryV3;
 
-  const addToQueueMutation = api.annotationQueueItems.createMany.useMutation({
-    onSuccess: (data) => {
-      showSuccessToast({
-        title: "Sessions added to queue",
-        description: `Selected sessions will be added to queue "${data.queueName}". This may take a minute.`,
-        link: {
-          href: `/project/${projectId}/annotation-queues/${data.queueId}`,
-          text: `View queue "${data.queueName}"`,
-        },
-      });
-    },
-  });
-
   const { scoreColumns, isLoading: isColumnLoading } =
     useScoreColumns<SessionTableRow>({
       projectId,
@@ -404,44 +387,7 @@ export default function SessionsTable({
     setSelectAll,
   });
 
-  const handleAddToAnnotationQueue = async ({
-    projectId,
-    targetId,
-  }: {
-    projectId: string;
-    targetId: string;
-  }) => {
-    const selectedSessionIds = Object.keys(selectedRows).filter((sessionId) =>
-      sessions.data?.sessions.map((t) => t.id).includes(sessionId),
-    );
-
-    await addToQueueMutation.mutateAsync({
-      projectId,
-      objectIds: selectedSessionIds,
-      objectType: AnnotationQueueObjectType.SESSION,
-      queueId: targetId,
-      isBatchAction: selectAll,
-      query: {
-        filter: backendFilterState,
-        orderBy: orderByState,
-      },
-    });
-    setSelectedRows({});
-  };
-
-  const tableActions: TableAction[] = [
-    {
-      id: ActionId.SessionAddToAnnotationQueue,
-      type: BatchActionType.Create,
-      label: "Add to Annotation Queue",
-      description: "Add selected sessions to an annotation queue.",
-      targetLabel: "Annotation Queue",
-      execute: handleAddToAnnotationQueue,
-      accessCheck: {
-        scope: "annotationQueues:CUD",
-      },
-    },
-  ];
+  const tableActions: TableAction[] = [];
 
   const columns: LangfuseColumnDef<SessionTableRow>[] = [
     selectActionColumn,

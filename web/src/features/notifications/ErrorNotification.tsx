@@ -1,6 +1,4 @@
-import { Button } from "@/src/components/ui/button";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
-import { useSupportDrawer } from "@/src/features/support-chat/SupportDrawerProvider";
 import { AlertTriangle, X } from "lucide-react";
 
 interface ErrorNotificationProps {
@@ -20,7 +18,6 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
   toast,
   path,
 }) => {
-  const { setOpen } = useSupportDrawer();
   const capture = usePostHogClientCapture();
   const isError = type === "ERROR";
   const textColor = isError
@@ -58,21 +55,6 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
           </div>
         )}
 
-        {isError && (
-          <Button
-            variant="errorNotification"
-            size={"sm"}
-            onClick={() => {
-              capture("toast:report_issue", {
-                toast_type: type,
-                path,
-              });
-              setOpen(true);
-            }}
-          >
-            Report issue to Langfuse team
-          </Button>
-        )}
       </div>
       <button
         className={`flex h-6 w-6 cursor-pointer items-start justify-end border-none bg-transparent p-0 ${textColor} transition-colors duration-200`}

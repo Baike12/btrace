@@ -43,7 +43,6 @@ import {
   type FilterState,
   type ObservationLevelType,
   BatchExportTableName,
-  AnnotationQueueObjectType,
   BatchActionType,
   ActionId,
   TableViewPresetTableName,
@@ -517,19 +516,6 @@ export default function TracesTable({
     },
   });
 
-  const addToQueueMutation = api.annotationQueueItems.createMany.useMutation({
-    onSuccess: (data) => {
-      showSuccessToast({
-        title: "Traces added to queue",
-        description: `Selected traces will be added to queue "${data.queueName}". This may take a minute.`,
-        link: {
-          href: `/project/${projectId}/annotation-queues/${data.queueId}`,
-          text: `View queue "${data.queueName}"`,
-        },
-      });
-    },
-  });
-
   const handleDeleteTraces = async ({ projectId }: { projectId: string }) => {
     const selectedTraceIds = Object.keys(selectedRows).filter((traceId) =>
       traces.data?.traces.map((t) => t.id).includes(traceId),
@@ -545,31 +531,6 @@ export default function TracesTable({
         searchType,
       },
       isBatchAction: selectAll,
-    });
-    setSelectedRows({});
-  };
-
-  const handleAddToAnnotationQueue = async ({
-    projectId,
-    targetId,
-  }: {
-    projectId: string;
-    targetId: string;
-  }) => {
-    const selectedTraceIds = Object.keys(selectedRows).filter((traceId) =>
-      traces.data?.traces.map((t) => t.id).includes(traceId),
-    );
-
-    await addToQueueMutation.mutateAsync({
-      projectId,
-      objectIds: selectedTraceIds,
-      objectType: AnnotationQueueObjectType.TRACE,
-      queueId: targetId,
-      isBatchAction: selectAll,
-      query: {
-        filter: filterState,
-        orderBy: orderByState,
-      },
     });
     setSelectedRows({});
   };
@@ -598,17 +559,6 @@ export default function TracesTable({
           } as TableAction,
         ]
       : []),
-    {
-      id: ActionId.TraceAddToAnnotationQueue,
-      type: BatchActionType.Create,
-      label: "Add to Annotation Queue",
-      description: "Add selected traces to an annotation queue.",
-      targetLabel: "Annotation Queue",
-      execute: handleAddToAnnotationQueue,
-      accessCheck: {
-        scope: "annotationQueues:CUD",
-      },
-    },
   ];
 
   const enableSorting = !hideControls;

@@ -2,12 +2,10 @@ import { api } from "@/src/utils/api";
 import { useMemo } from "react";
 import {
   type FilterState,
-  AnnotationQueueObjectType,
   type TracingSearchType,
   type ScoreAggregate,
 } from "@langfuse/shared";
 import { type FullEventsObservations } from "@langfuse/shared/src/server";
-import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { joinTableCoreAndMetrics } from "@/src/components/table/utils/joinTableCoreAndMetrics";
 import { type EventBatchIOOutput } from "@/src/features/events/server/eventsRouter";
 
@@ -41,9 +39,6 @@ export function useEventsTableData({
   orderByState,
   searchQuery,
   searchType,
-  selectedRows,
-  selectAll,
-  setSelectedRows,
 }: UseEventsTableDataParams) {
   // Prepare query payloads
   const getCountPayload = useMemo(
@@ -161,59 +156,11 @@ export function useEventsTableData({
 
   const totalCount = totalCountQuery.data?.totalCount ?? null;
 
-  // Add to queue mutation
-  const addToQueueMutation = api.annotationQueueItems.createMany.useMutation({
-    onSuccess: (data) => {
-      showSuccessToast({
-        title: "Observations added to queue",
-        description: `Selected observations will be added to queue "${data.queueName}". This may take a minute.`,
-        link: {
-          href: `/project/${projectId}/annotation-queues/${data.queueId}`,
-          text: `View queue "${data.queueName}"`,
-        },
-      });
-    },
-  });
-
-  // Handler for adding to annotation queue
-  const handleAddToAnnotationQueue = async ({
-    projectId,
-    targetId,
-  }: {
-    projectId: string;
-    targetId: string;
-  }) => {
-    const visibleObservationIds = new Set(
-      (observations.data?.observations ?? [])
-        .map((observation) => observation.id)
-        .filter((id): id is string => Boolean(id)),
-    );
-
-    const selectedObservationIds = Object.keys(selectedRows).filter(
-      (observationId) => visibleObservationIds.has(observationId),
-    );
-
-    await addToQueueMutation.mutateAsync({
-      projectId,
-      objectIds: selectedObservationIds,
-      objectType: AnnotationQueueObjectType.OBSERVATION,
-      queueId: targetId,
-      isBatchAction: selectAll,
-      query: {
-        filter: filterState,
-        orderBy: orderByState,
-      },
-    });
-    setSelectedRows({});
-  };
-
   return {
     observations: joinedData,
     dataUpdatedAt: observations.dataUpdatedAt,
     totalCountQuery,
     totalCount,
-    addToQueueMutation,
-    handleAddToAnnotationQueue,
     ioLoading: ioDataQuery.isLoading,
     error,
     errorHttpStatus,

@@ -7,7 +7,6 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 import type { Session, User } from "@/src/hooks/useAuth";
 import { useEntitlements } from "@/src/features/entitlements/hooks";
-import { useUiCustomization } from "@/src/ee/features/ui-customization/useUiCustomization";
 import { useLangfuseCloudRegion } from "@/src/features/organizations/hooks";
 import {
   ROUTES,
@@ -50,7 +49,6 @@ function groupNavigationItems(items: NavigationItem[]): GroupedNavigation {
   const groupedItems = groupedResult
     ? [
         ...(grouped[RouteGroup.Observability] || []),
-        ...(grouped[RouteGroup.PromptManagement] || []),
         ...(grouped[RouteGroup.Evaluation] || []),
       ]
     : [];
@@ -82,7 +80,6 @@ export function useFilteredNavigation(
 ) {
   const router = useRouter();
   const entitlements = useEntitlements();
-  const uiCustomization = useUiCustomization();
   const { isLangfuseCloud } = useLangfuseCloudRegion();
 
   const routerProjectId = router.query.projectId as string | undefined;
@@ -99,7 +96,6 @@ export function useFilteredNavigation(
       enableExperimentalFeatures: false,
       cloudAdmin: Boolean(session?.user?.admin && isLangfuseCloud),
       entitlements,
-      uiCustomization,
       isLangfuseCloud,
       currentPath: router.asPath,
     }),
@@ -108,7 +104,6 @@ export function useFilteredNavigation(
       routerOrganizationId,
       session,
       entitlements,
-      uiCustomization,
       router.asPath,
       isLangfuseCloud,
     ],
