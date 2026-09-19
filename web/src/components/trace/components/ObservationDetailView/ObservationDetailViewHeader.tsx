@@ -12,13 +12,11 @@
 import { memo, useMemo } from "react";
 import {
   type ObservationType,
-  isGenerationLike,
 } from "@langfuse/shared";
 import { type SelectionData } from "@/src/features/comments/contexts/InlineCommentSelectionContext";
 import { type ObservationReturnTypeWithMetadata } from "@/src/types/server-types";
 import { ItemBadge } from "@/src/components/ItemBadge";
 import { LocalIsoDate } from "@/src/components/LocalIsoDate";
-import { NewDatasetItemFromExistingObject } from "@/src/features/datasets/components/NewDatasetItemFromExistingObject";
 import { AnnotateDrawer } from "@/src/features/scores/components/AnnotateDrawer";
 import { CommentDrawerButton } from "@/src/features/comments/CommentDrawerButton";
 import { PromptBadge } from "@/src/components/trace/components/_shared/PromptBadge";
@@ -37,10 +35,7 @@ import {
 import { CostBadge, UsageBadge } from "./ObservationMetadataBadgesTooltip";
 import { ModelBadge } from "./ObservationMetadataBadgeModel";
 import { ModelParametersBadges } from "./ObservationMetadataBadgeModelParameters";
-import {
-  type WithStringifiedMetadata,
-  type MetadataDomainClient,
-} from "@/src/utils/clientSideDomainTypes";
+import { type WithStringifiedMetadata } from "@/src/utils/clientSideDomainTypes";
 import { type ScoreDomain } from "@langfuse/shared";
 import { type AggregatedTraceMetrics } from "@/src/components/trace/lib/trace-aggregation";
 import type Decimal from "decimal.js";
@@ -60,14 +55,6 @@ import { DualAnnotationContent } from "@/src/features/scores/components/DualAnno
 
 export interface ObservationDetailViewHeaderProps {
   observation: ObservationReturnTypeWithMetadata;
-  observationWithIO:
-    | (Omit<ObservationReturnTypeWithMetadata, "traceId" | "metadata"> & {
-        traceId: string | null;
-        input: string | null;
-        output: string | null;
-        metadata: MetadataDomainClient;
-      })
-    | undefined;
   projectId: string;
   traceId: string;
   latencySeconds: number | null;
@@ -85,7 +72,6 @@ export interface ObservationDetailViewHeaderProps {
 export const ObservationDetailViewHeader = memo(
   function ObservationDetailViewHeader({
     observation,
-    observationWithIO,
     projectId,
     traceId,
     latencySeconds,
@@ -146,18 +132,6 @@ export const ObservationDetailViewHeader = memo(
           </div>
           {/* Action buttons */}
           <div className="flex h-full flex-wrap content-start items-start justify-start gap-0.5 @2xl:mr-1 @2xl:justify-end">
-            {observationWithIO && (
-              <NewDatasetItemFromExistingObject
-                traceId={traceId}
-                observationId={observation.id}
-                projectId={projectId}
-                input={observationWithIO.input}
-                output={observationWithIO.output}
-                metadata={observationWithIO.metadata}
-                key={observation.id}
-                size="sm"
-              />
-            )}
             {/* Hide annotation buttons in annotation mode (panel shown separately) */}
             {!isAnnotationMode && (
               <div className="flex items-start">

@@ -99,7 +99,6 @@ import useSessionStorage from "@/src/components/useSessionStorage";
 import { api } from "@/src/utils/api";
 import { useHasEntitlement } from "@/src/features/entitlements/hooks";
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
-import { useSearchBarEnabled } from "@/src/features/search-bar/hooks/useSearchBarEnabled";
 import { useEventsSearchBar } from "@/src/features/search-bar/hooks/useEventsSearchBar";
 import { EventsSearchBarRow } from "@/src/features/search-bar/components/EventsSearchBarRow";
 import { toObservedOptions } from "@/src/features/search-bar/lib/observed-options";
@@ -407,15 +406,12 @@ export default function ObservationsEventsTable({
 
   // Grammar search bar: an ADDITIONAL editor that coexists with the facet
   // sidebar, and the two stay in sync. Generally available on the v4 events
-  // tables (no longer a per-user Feature Preview opt-in — useSearchBarEnabled()
-  // is now always true). The sidebar's FilterState (+ the table's full-text
+  // tables, for everyone). The sidebar's FilterState (+ the table's full-text
   // search) remains the single source of truth — the bar reads from and writes
   // to it. Only the legacy toolbar search field is replaced (full-text search —
   // bare text and content:/input:/output: — goes inline in the bar); the
   // sidebar and time/refresh controls stay.
-  const searchBarEnabled = useSearchBarEnabled();
   const searchBarMode =
-    searchBarEnabled &&
     !hideControls &&
     !externalFilterState &&
     !peekContext &&

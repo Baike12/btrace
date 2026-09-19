@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useRouter } from "next/router";
 import { api } from "@/src/utils/api";
 import {
   Dialog,
@@ -10,7 +9,6 @@ import {
   DialogBody,
 } from "@/src/components/ui/dialog";
 import { Button } from "@/src/components/ui/button";
-import { PlusIcon } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -38,7 +36,6 @@ interface SelectWidgetDialogProps {
   onOpenChange: (open: boolean) => void;
   projectId: string;
   onSelectWidget: (widget: WidgetItem) => void;
-  dashboardId: string;
 }
 
 export function SelectWidgetDialog({
@@ -46,9 +43,7 @@ export function SelectWidgetDialog({
   onOpenChange,
   projectId,
   onSelectWidget,
-  dashboardId,
 }: SelectWidgetDialogProps) {
-  const router = useRouter();
   const [selectedWidgetId, setSelectedWidgetId] = useState<string | null>(null);
 
   // Fetch widgets
@@ -64,10 +59,6 @@ export function SelectWidgetDialog({
       enabled: Boolean(projectId) && open,
     },
   );
-
-  const handleNavigateToNewWidget = () => {
-    router.push(`/project/${projectId}/widgets/new?dashboardId=${dashboardId}`);
-  };
 
   const handleAddWidget = () => {
     if (selectedWidgetId) {
@@ -146,10 +137,6 @@ export function SelectWidgetDialog({
         </DialogBody>
 
         <DialogFooter className="mt-4 flex justify-between">
-          <Button onClick={handleNavigateToNewWidget} variant="outline">
-            <PlusIcon className="mr-2 h-4 w-4" />
-            Create New Widget
-          </Button>
           <div className="flex gap-2">
             <Button onClick={() => onOpenChange(false)} variant="outline">
               Cancel

@@ -471,7 +471,6 @@ export default function DashboardDetail() {
           onOpenChange={setIsWidgetDialogOpen}
           projectId={projectId}
           onSelectWidget={handleSelectWidget}
-          dashboardId={dashboardId}
         />
         {dashboard.isPending || !localDashboardDefinition ? (
           <NoDataOrLoading isLoading={true} />

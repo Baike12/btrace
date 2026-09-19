@@ -288,7 +288,6 @@ export function ObservationDetailView({
       {/* Header section (extracted component) */}
       <ObservationDetailViewHeader
         observation={observation}
-        observationWithIO={observationWithIO}
         projectId={projectId}
         traceId={traceId}
         latencySeconds={latencySeconds}

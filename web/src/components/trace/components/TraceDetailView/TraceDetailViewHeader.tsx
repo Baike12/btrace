@@ -13,7 +13,6 @@ import { memo, useMemo } from "react";
 import {
   type TraceDomain,
   type ScoreDomain,
-  AnnotationQueueObjectType,
   LangfuseInternalTraceEnvironment,
 } from "@langfuse/shared";
 import { type SelectionData } from "@/src/features/comments/contexts/InlineCommentSelectionContext";
@@ -22,9 +21,7 @@ import { type ObservationReturnTypeWithMetadata } from "@/src/types/server-types
 import { ItemBadge } from "@/src/components/ItemBadge";
 import { LocalIsoDate } from "@/src/components/LocalIsoDate";
 import { DetailHeaderActionsMenu } from "@/src/components/trace/components/_shared/DetailHeaderActionsMenu";
-import { NewDatasetItemFromExistingObject } from "@/src/features/datasets/components/NewDatasetItemFromExistingObject";
 import { AnnotateDrawer } from "@/src/features/scores/components/AnnotateDrawer";
-import { CreateNewAnnotationQueueItem } from "@/src/features/annotation-queues/components/CreateNewAnnotationQueueItem";
 import { CommentDrawerButton } from "@/src/features/comments/CommentDrawerButton";
 import {
   SessionBadge,
@@ -104,15 +101,6 @@ export const TraceDetailViewHeader = memo(function TraceDetailViewHeader({
         </div>
         {/* Action buttons */}
         <div className="flex h-full flex-wrap content-start items-start justify-start gap-0.5 @2xl:mr-1 @2xl:justify-end">
-          <NewDatasetItemFromExistingObject
-            traceId={trace.id}
-            projectId={projectId}
-            input={trace.input}
-            output={trace.output}
-            metadata={trace.metadata}
-            key={trace.id}
-            size="sm"
-          />
           {/* Hide annotation buttons in annotation mode (panel shown separately) */}
           {!isAnnotationMode && (
             <div className="flex items-start">
@@ -128,12 +116,6 @@ export const TraceDetailViewHeader = memo(function TraceDetailViewHeader({
                   projectId: projectId,
                   environment: trace.environment,
                 }}
-                size="sm"
-              />
-              <CreateNewAnnotationQueueItem
-                projectId={projectId}
-                objectId={trace.id}
-                objectType={AnnotationQueueObjectType.TRACE}
                 size="sm"
               />
             </div>

@@ -15,7 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useEffect } from "react";
 import { api } from "@/src/utils/api";
 import { useV4Beta } from "@/src/features/events/hooks/useV4Beta";
-import { type EventBatchIOOutput } from "@/src/features/events/server/eventsRouter";
+import { type EventBatchIOOutput } from "@/src/features/events/types";
 import {
   type ObservationReturnTypeWithMetadata,
   type ObservationReturnType,

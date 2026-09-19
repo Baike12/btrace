@@ -15,16 +15,10 @@ import { cn } from "@/src/utils/tailwind";
 
 import inAppAgentDarkIllustration from "../assets/in-app-agent-dark.svg";
 import inAppAgentLightIllustration from "../assets/in-app-agent-light.svg";
-import filterSearchBarDarkIllustration from "../assets/filter-search-bar-dark.svg";
-import filterSearchBarLightIllustration from "../assets/filter-search-bar-light.svg";
 
 /** Flags the Feature Preview modal can toggle. Keep in sync with the
- *  userAccount.setFeaturePreviewEnabled allowlist and available-flags.ts.
- *  NOTE: "searchBar" is retired (the bar is GA on the v4 events tables) and no
- *  longer renders a tile — see ControlledFeaturePreviewModal. It is kept in the
- *  type + registry below only as dead code for a safe rollback.
- *  TODO(remove ~2026-06-19): drop "searchBar" here once GA is confirmed. */
-export type PreviewFlag = "inAppAgent" | "searchBar";
+ *  userAccount.setFeaturePreviewEnabled allowlist and available-flags.ts. */
+export type PreviewFlag = "inAppAgent";
 
 type PreviewIllustration = {
   light: React.ComponentProps<typeof Image>["src"];
@@ -67,25 +61,6 @@ const PREVIEW_REGISTRY: PreviewRegistryItem[] = [
       light: inAppAgentLightIllustration,
       dark: inAppAgentDarkIllustration,
       alt: "Langfuse Assistant connects traces, scores, and prompts to answer project questions.",
-    },
-  },
-  // TODO(remove ~2026-06-19): dead registry entry — "searchBar" is GA on the v4
-  // events tables and no longer surfaced in the dialog (no state entry in
-  // ControlledFeaturePreviewModal), so this is filtered out and never renders.
-  // Kept for a safe rollback; delete with the rest of the searchBar plumbing.
-  {
-    flag: "searchBar",
-    title: "Filter Search Bar",
-    sidebarLabel: "Filter Search Bar",
-    description:
-      "A keyboard-driven query bar on the Observations and Traces tables — type filters like level:ERROR -env:dev latency:>2 with inline suggestions, alongside the existing filter sidebar.",
-    details:
-      "The search bar lets you build and edit filters by typing a compact query language with autocomplete, instead of clicking through the sidebar. It stays in sync with the sidebar (both read and write the same filter state) and supports field filters, comparisons, any-of groups, negation, metadata/score paths, and full-text search across input/output. It is available on the new (v4) Observations and Traces tables.",
-    feedbackUrl: "https://github.com/orgs/langfuse/discussions/14196",
-    illustration: {
-      light: filterSearchBarLightIllustration,
-      dark: filterSearchBarDarkIllustration,
-      alt: "The filter search bar turns typed queries like level:ERROR -env:dev into Observations and Traces table filters with inline suggestions.",
     },
   },
 ];

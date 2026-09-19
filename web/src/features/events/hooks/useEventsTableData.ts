@@ -7,7 +7,7 @@ import {
 } from "@langfuse/shared";
 import { type FullEventsObservations } from "@langfuse/shared/src/server";
 import { joinTableCoreAndMetrics } from "@/src/components/table/utils/joinTableCoreAndMetrics";
-import { type EventBatchIOOutput } from "@/src/features/events/server/eventsRouter";
+import { type EventBatchIOOutput } from "@/src/features/events/types";
 
 type FullEventsObservation = FullEventsObservations[number] & {
   scores?: ScoreAggregate;

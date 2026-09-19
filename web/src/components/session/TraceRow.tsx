@@ -9,8 +9,6 @@ import React, { useEffect, useCallback, useRef } from "react";
 import { AnnotateDrawer } from "@/src/features/scores/components/AnnotateDrawer";
 import { CommentDrawerButton } from "@/src/features/comments/CommentDrawerButton";
 import { ItemBadge } from "@/src/components/ItemBadge";
-import { NewDatasetItemFromTraceId } from "@/src/components/session/NewDatasetItemFromTrace";
-import { CreateNewAnnotationQueueItem } from "@/src/features/annotation-queues/components/CreateNewAnnotationQueueItem";
 import { useSessionDetailStore } from "@/src/components/session/SessionDetailStoreProvider";
 
 const TraceSkeleton = () => {
@@ -91,12 +89,6 @@ const TraceRow = React.memo(
                 </div>
               </Link>
               <div className="flex flex-wrap gap-2">
-                <NewDatasetItemFromTraceId
-                  projectId={projectId}
-                  traceId={trace.id}
-                  timestamp={new Date(trace.timestamp)}
-                  buttonVariant="outline"
-                />
                 <div className="flex items-start">
                   <AnnotateDrawer
                     key={"annotation-drawer" + trace.id}
@@ -115,12 +107,6 @@ const TraceRow = React.memo(
                       projectId: projectId,
                       environment: trace.environment,
                     }}
-                  />
-                  <CreateNewAnnotationQueueItem
-                    projectId={projectId}
-                    objectId={trace.id}
-                    objectType="TRACE"
-                    variant="outline"
                   />
                 </div>
                 <CommentDrawerButton

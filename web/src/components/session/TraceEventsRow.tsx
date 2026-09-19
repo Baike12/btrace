@@ -8,9 +8,7 @@ import React from "react";
 import { AnnotateDrawer } from "@/src/features/scores/components/AnnotateDrawer";
 import { CommentDrawerButton } from "@/src/features/comments/CommentDrawerButton";
 import { ItemBadge } from "@/src/components/ItemBadge";
-import { NewDatasetItemFromTraceId } from "@/src/components/session/NewDatasetItemFromTrace";
 import { type FilterState } from "@langfuse/shared";
-import { CreateNewAnnotationQueueItem } from "@/src/features/annotation-queues/components/CreateNewAnnotationQueueItem";
 import { IOPreview } from "@/src/components/trace/components/IOPreview/IOPreview";
 import { api } from "@/src/utils/api";
 
@@ -174,12 +172,6 @@ export const TraceEventsRow = React.memo(
                     </div>
                   </Link>
                   <div className="flex flex-wrap gap-2">
-                    <NewDatasetItemFromTraceId
-                      projectId={projectId}
-                      traceId={trace.id}
-                      timestamp={new Date(trace.timestamp)}
-                      buttonVariant="outline"
-                    />
                     <div className="flex items-start">
                       <AnnotateDrawer
                         key={"annotation-drawer" + trace.id}
@@ -198,12 +190,6 @@ export const TraceEventsRow = React.memo(
                           projectId: projectId,
                           environment: trace.environment ?? undefined,
                         }}
-                      />
-                      <CreateNewAnnotationQueueItem
-                        projectId={projectId}
-                        objectId={trace.id}
-                        objectType="TRACE"
-                        variant="outline"
                       />
                     </div>
                     <CommentDrawerButton

@@ -34,7 +34,6 @@ import {
   type ScoreDomain,
   TableViewPresetTableName,
 } from "@langfuse/shared";
-import { CreateNewAnnotationQueueItem } from "@/src/features/annotation-queues/components/CreateNewAnnotationQueueItem";
 import { WebCalloutButton } from "@/src/features/web-callouts/components/WebCalloutMenuItem";
 import { TablePeekViewTraceDetail } from "@/src/components/table/peek/peek-trace-detail";
 import { usePeekNavigation } from "@/src/components/table/peek/hooks/usePeekNavigation";
@@ -414,12 +413,6 @@ export const SessionPage: React.FC<{
                     environment: session.data?.environment,
                   }}
                   buttonVariant="outline"
-                />
-                <CreateNewAnnotationQueueItem
-                  projectId={projectId}
-                  objectId={sessionId}
-                  objectType="SESSION"
-                  variant="outline"
                 />
               </div>
               <div className="flex items-center">
@@ -977,12 +970,6 @@ export const SessionEventsPage: React.FC<{
                     environment: session.data?.environment,
                   }}
                   buttonVariant="outline"
-                />
-                <CreateNewAnnotationQueueItem
-                  projectId={projectId}
-                  objectId={sessionId}
-                  objectType="SESSION"
-                  variant="outline"
                 />
               </div>
               <div className="flex items-center">
