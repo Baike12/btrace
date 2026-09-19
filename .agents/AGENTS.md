@@ -17,15 +17,15 @@
 - Read the minimal local context required for the task.
 - Keep changes scoped and avoid unrelated refactors.
 - For bug fixes, write the failing test first, confirm it fails, then fix the
-  bug. If the bug depends on a data shape, pause and ask: can
-  `pnpm run seed` prefill that shape locally? If not, consider extending a
-  seeder scenario so the bug stays cheaply reproducible
-  (`packages/shared/scripts/seeder/AGENTS.md`), or note why a seed cannot
-  express it.
+  bug. If the bug depends on a data shape, pause and ask whether it can be
+  produced locally. (`pnpm run seed` is currently broken — see Known Issues —
+  so today that means reusing the existing local database or fixing the CLI
+  first; `packages/shared/scripts/seeder/AGENTS.md` describes the intended
+  seeder design.)
 - For user-visible frontend changes in `web/**`, review the affected flow in a
-  real browser before signoff. Prefill the data the flow needs with the seed
-  CLI (`pnpm run seed -- list` shows scenarios; runs print UI deep links) —
-  never with ad-hoc scripts or raw ClickHouse inserts.
+  real browser before signoff. Prefill the data the flow needs by whatever
+  working means is available — never with ad-hoc scripts or direct SQL inserts
+  into tables the app also writes.
 - For documentation screenshots in Markdown, avoid fixed `height` on `<img>`
   tags; prefer Markdown images or width-only HTML so previews preserve aspect
   ratio.
@@ -49,9 +49,7 @@ btrace/
 |  `- bin/worker.rs          #   queue consumers only (NOT shipped in the image)
 |- web/                      # Next.js app (UI frontend, SSR pages, Pages Router)
 |- packages/shared/          # Shared domain, DB schema (Prisma), queue contracts
-|- ee/                       # Enterprise package consumed by web
 |- generated/                # Generated API clients (do not hand-edit)
-|- fern/                     # API definition sources
 |- docs/                     # Architecture & design documents
 |  `- lexqa-integration.md   # How LexQA consumes this instance (OTLP + public API)
 |- docker/entrypoint.sh      #   supervises the two processes in the image
@@ -93,9 +91,8 @@ btrace/
 - **LexQA integration**: see `docs/lexqa-integration.md`.
 
 - Dependency direction:
-  - `web` -> `@langfuse/shared`, `@langfuse/ee`
-  - `@langfuse/ee` -> `@langfuse/shared`
-  - `@langfuse/shared` -> no imports from `web`, `langfuse-rs`, or `ee`
+  - `web` -> `@langfuse/shared`
+  - `@langfuse/shared` -> no imports from `web` or `langfuse-rs`
   - `langfuse-rs` -> connects directly to PostgreSQL via sqlx (independent of Prisma)
 - Queue payload schemas and queue-name contracts are owned by
   `packages/shared/src/server/queues.ts`.
@@ -109,10 +106,14 @@ btrace/
   - Rust queue system: `langfuse-rs/crates/langfuse-queue/src/consumer.rs`
   - Rust API routes: `langfuse-rs/crates/langfuse-api/src/app.rs`
 - Architecture principles live in `.agents/ARCHITECTURE_PRINCIPLES.md`.
-- **Important**: `web/src/app/api/` has been renamed to `web/src/app/api.disabled/`
-  because App Router API routes interfere with Pages Router dynamic routes under
-  `/api/` in Next.js 16. All API routes must live under `web/src/pages/api/`.
-  App Router UI features (layout, loading, error boundaries) are unaffected.
+- **There are no Next.js API routes any more.** `web/src/pages/api/**` and the
+  App Router `web/src/app/api.disabled/` were both removed when the backend moved
+  to Rust; `web/src/app/` now holds only `layout.tsx`. Every `/api/*` request is
+  either proxied to the Rust backend by the `rewrites()` block in
+  `web/next.config.mjs` or served by `web/src/utils/api.ts`, a tRPC-shaped
+  wrapper over the Rust REST API. Do not add Pages Router API routes back: the
+  App Router interception problem that motivated `api.disabled/` still applies to
+  Next.js 16.
 
 ## Core Commands
 
@@ -146,11 +147,77 @@ btrace/
 - `packages/shared/prisma/**`:
   `pnpm run lint`, `pnpm run db:generate`, and targeted web regressions.
 - `langfuse-rs/**`: `cargo build`, `cargo test`, `cargo clippy`.
-- Public API contracts in `web/src/pages/api/public/**`,
-  `web/src/features/public-api/types/**`, or `fern/apis/**`: `pnpm run lint`,
-  targeted server API tests, and Fern update/regeneration.
+- Public API contracts: `langfuse-rs/crates/langfuse-api/src/routes/**` owns the
+  implementation. `pnpm run lint` plus targeted Rust tests.
 - Cross-package refactors: `pnpm run lint`, `pnpm run typecheck`, `cargo build`,
   and targeted tests for impacted packages.
+
+## Known Issues
+
+Debt that is deliberately carried, with the evidence to confirm it. Each item
+names a command or file that reproduces the claim — check it before assuming the
+entry is stale.
+
+1. **Neither web nor shared typechecks or lints cleanly.** `npx tsc -p
+   web/tsconfig.build.json --noEmit --skipLibCheck` reports ~385 errors
+   (`pnpm run typecheck` delegates to the same config via tsgo), dominated by
+   TS7006 (implicit `any` at call sites) because `web/src/utils/api.ts` returns
+   `any` from its tRPC-shaped proxy. `pnpm run lint` exits 1 on
+   `--max-warnings 0`: 8 warnings in web (`src/pages/auth/sign-in.tsx`,
+   `sign-up.tsx`, `src/pages/project/[projectId]/settings/index.tsx`,
+   `src/utils/api.ts`) and 32 in `packages/shared`. All of them predate this
+   cleanup; none are in files the cleanup touched. `Dockerfile` sets
+   `NEXT_IGNORE_BUILD_ERRORS=true` so image builds do not fail on the type
+   errors. Error counts are only meaningful when compared as a set — line shifts
+   make identical errors look new, so diff on (file, message) instead.
+
+2. **`packages/shared/src/server/queries/clickhouse-sql/` is an alias layer, and
+   part of it is a no-op.** The directory is 85 lines of re-exports from
+   `pg-sql/` (641 lines, the real implementation) plus stubs. The stubs are the
+   problem: `event-query-builder.ts` exports `EventsQueryBuilder` as an empty
+   `class {}` and `buildEventsFullTableSplitQuery` as `return null`, and
+   `orderByToEntries` returns `[]` — and `repositories/events.ts` (4074 lines,
+   reachable from the UI) constructs that empty class at five sites. Consumers
+   never got repointed at `pg-sql/`, so this is the highest-priority item: the
+   code silently produces empty queries instead of failing. Nothing was deleted
+   here because deciding whether `events.ts` is live requires its own audit.
+
+3. **Several reachable views call procedures the Rust API does not serve.**
+   `web/src/utils/api.ts` lists the real resources (`REAL_RESOURCES`); anything
+   else falls through to a placeholder. Affected today: `api.annotationQueues.*`
+   and `api.annotationQueueItems.*`, `api.dashboardWidgets.*` and
+   `api.dashboard.*` (dashboards list over `/api/dashboards`, but the detail
+   view cannot load its widgets), `api.members.*`, `api.scoreConfigs.*`,
+   `api.llmApiKey.*` / `api.defaultLlmModel.*`, and `api.events.batchIO` (the v4
+   events tables' input/output column). These pages render empty rather than
+   erroring.
+
+4. **The placeholder proxy is not silent.** `web/src/utils/api.ts` returns
+   `{ data: undefined }` from placeholder `useQuery`s and `undefined` from
+   placeholder `useMutation`s, logging a `console.warn`. A mutation whose
+   `onSuccess` destructures its result throws `TypeError: Cannot read properties
+   of undefined` — that is how the support form used to crash on submit. Prefer
+   deleting a call site over tolerating one.
+
+5. **The container runs no database migrations.** Neither `Dockerfile` nor
+   `docker/entrypoint.sh` invokes `prisma migrate`; a fresh deployment must be
+   migrated out of band. `docs/lexqa-integration.md` does not cover it.
+
+6. **The seeder CLI is broken.** `pnpm run seed` fails with
+   `ENOENT … tsx scripts/seeder/cli.ts`, and `packages/shared/package.json`'s
+   `prisma.seed` points at `scripts/seeder/seed-postgres.ts`, which does not
+   exist either. `packages/shared/scripts/seeder/` still holds `scenarios/`,
+   `utils/` and `seed-dataset-versions.ts`, so the pieces are there but nothing
+   wires them up. Until it is fixed, seed test data by hand or reuse the
+   existing local database.
+
+7. **Four dependencies have no remaining importers**:
+   `@clickhouse/client`, `@aws-sdk/client-sesv2`, `nodemailer` and
+   `@types/nodemailer` (the TypeScript email tree and the ClickHouse client
+   stub were removed). `ioredis` looks similar but is *not* unused —
+   `server/auth/apiKeys.ts` and `server/services/PromptService/index.ts` still
+   import it. Removing the four is a `pnpm install` away but was left out to
+   keep the cleanup commit off the lockfile.
 
 ## Generated Files
 
@@ -162,8 +229,8 @@ Do not hand-edit generated or build artifacts:
 - `*/dist/*`
 - `packages/shared/prisma/generated/*`
 
-Public API contract changes must update Fern sources in `fern/apis/**` and
-regenerated outputs. Never hand-edit `generated/**`.
+Public API contract changes are made in `langfuse-rs/crates/langfuse-api/**`.
+Never hand-edit `generated/**`.
 
 ## Shared Agent Setup
 

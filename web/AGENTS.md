@@ -1,89 +1,70 @@
-# Codex Guidelines for `web`
+# Agent Guidelines for `web`
 
 This file covers package-local guidance for this package.
-Use root [AGENTS.md](../AGENTS.md) for monorepo-level rules.
+Use root [AGENTS.md](../AGENTS.md) for monorepo-level rules, and read its
+**Known Issues** section before assuming a failing command is your fault.
 
 ## Purpose
 
-- Next.js application with UI, tRPC backend, and public REST API routes (Pages Router).
-- Check `web/package.json` for current Next.js, React, and tRPC versions before
-  version-sensitive work.
-- Primary package for frontend and most request/response surface changes.
-- **Architecture Note**: Queue consumers and future API routes are migrating to the
-  Rust backend (`langfuse-rs/`). Queue consumer code that was in `worker/` has been
-  removed. The Rust backend runs on port 8080 and connects directly to PostgreSQL.
-- **App Router restriction**: `web/src/app/api/` is renamed to `app/api.disabled/`
-  because Next.js 16 App Router API routes intercept and break Pages Router dynamic
-  routes under `/api/`. Keep all API routes under `web/src/pages/api/`.
+- Next.js app that renders the UI and does SSR. It is **frontend only**.
+- There is no tRPC backend and there are no Next.js API routes. `src/server/**`,
+  `src/features/*/server/**`, `src/pages/api/**` and `src/app/api.disabled/`
+  were all removed in the move to the Rust backend; `src/app/` now holds only
+  `layout.tsx`. Do not add them back — the App Router interception problem that
+  forced `api.disabled/` still applies on Next.js 16.
+- The backend is `langfuse-rs/` (axum + sqlx). It listens on **:8010**
+  (`RUST_API_URL`) and talks to Postgres directly.
+- Check `web/package.json` for the current Next.js, React and Vitest versions
+  before version-sensitive work.
 
-## Maintenance Contract
+## How web talks to the backend
 
-- `AGENTS.md` is a living document.
-- Update this file in the same PR when material web-local changes occur:
-  - new/renamed web entry points
-  - new API route families
-  - changed web-specific verification commands
-- If the change also affects monorepo workflows or other packages, update root
-  `AGENTS.md` too.
+Two layers, both in `web/`:
+
+1. `next.config.mjs` → `rewrites()` proxies `/api/<resource>/*`,
+   `/api/project/*`, `/api/auth/{login,signup,session,logout}` and
+   `/api/public/*` to `RUST_API_URL`. Only `/api/trpc/*` and NextAuth used to be
+   local; neither exists any more.
+2. `src/utils/api.ts` is a tRPC-shaped wrapper over that REST surface, so
+   existing call sites (`api.traces.all.useQuery(...)`) kept working across the
+   migration.
+
+`src/utils/api.ts` is the single most important file in this package. It maps
+procedure names onto REST verbs through `REAL_RESOURCES`; **anything not in that
+map resolves to a placeholder that returns `undefined`** and only logs a
+`console.warn`. When adding a call site, confirm the resource and procedure are
+in `REAL_RESOURCES` first, and see Known Issues for the views that currently are
+not.
 
 ## High-Signal Entry Points
 
 - App shell/providers: `src/pages/_app.tsx`
-- tRPC context/procedures: `src/server/api/trpc.ts`
-- tRPC router registry: `src/server/api/root.ts`
-- tRPC routers: `src/server/api/routers/*`, `src/features/*/server/*`
-- Public REST API routes: `src/pages/api/public/*`
-- Unstable public eval APIs: `src/pages/api/public/unstable/{evaluators,evaluation-rules}/*`
+- Data access: `src/utils/api.ts`
+- Layout, navigation registry and filtering: `src/components/layouts/routes.tsx`,
+  `src/components/layouts/app-layout/**`
 - Feature modules: `src/features/*`
 - Reusable UI components: `src/components/*`
-- Tests:
-  - Server integration tests: `src/__tests__/server/*.servertest.ts`
-  - Server unit tests: `src/__tests__/server/unit/*.servertest.ts`
-  - Client tests: `src/**/*.clienttest.ts(x)`
-  - E2E: `src/__e2e__/*`
+- Trace rendering: `src/components/trace/**`
+- Tables, filters and the grammar search bar: `src/components/table/**`,
+  `src/features/filters/**`, `src/features/search-bar/**`
 
 ## Shared Package Imports
 
 - Prefer `@langfuse/shared` in frontend-safe web code for shared types, zod
   schemas, domain contracts, table definitions, prompt/eval/model-pricing
   helpers, and other cross-runtime utilities.
-- Use `@langfuse/shared/src/server` only from server-only web code such as
-  `src/server/**`, `src/pages/api/**`, and server tests.
-- Use `@langfuse/shared/src/db` only in backend or test code that needs direct
-  Prisma access; never route it into client bundles.
+- Use `@langfuse/shared/src/server` only where a server-only helper is genuinely
+  needed (SSR pages, `getServerSideProps`, test setup). It pulls in the server
+  tree, so keep it out of client components.
 - Use narrower subpaths such as `@langfuse/shared/src/env` or
-  `@langfuse/shared/encryption` only when that focused surface is the clearest
+  `@langfuse/shared/encryption` when that focused surface is the clearest
   dependency.
-- See `../packages/shared/AGENTS.md` for the full shared export map and what
-  each entrypoint contains.
-- For the higher-level platform topology (web, Rust backend, Postgres),
-  also read the architecture design document at `../docs/rust-backend-design.md`.
-
-## Package-Local Skills
-
-- Shared browser-review workflow for user-visible frontend changes:
-  [`../.agents/skills/frontend-browser-review/SKILL.md`](../.agents/skills/frontend-browser-review/SKILL.md)
-- Large frontend feature, virtualized-list, and local state architecture:
-  [`../.agents/skills/frontend-large-feature-architecture/SKILL.md`](../.agents/skills/frontend-large-feature-architecture/SKILL.md)
-- React composition and component API design:
-  [`web/.agents/skills/vercel-composition-patterns/SKILL.md`](.agents/skills/vercel-composition-patterns/SKILL.md)
-- React/Next.js performance and rendering best practices:
-  [`web/.agents/skills/vercel-react-best-practices/SKILL.md`](.agents/skills/vercel-react-best-practices/SKILL.md)
-
-Read these package-local skills before substantial frontend refactors when the
-task involves component composition, reusable component APIs, rendering
-performance, virtualized lists, local feature stores, bundle size,
-React/Next.js performance patterns, or browser-based signoff of user-visible
-changes.
+- See `../packages/shared/AGENTS.md` for the full shared export map.
 
 ## Web Conventions
 
-- Put net-new feature code under `src/features/<feature>/*`; put broadly reusable
-  components under `src/components/*`.
-- We use tRPC for full-stack web features; register routers in
-  `src/server/api/root.ts`.
-- Authentication and RBAC guidance lives in `src/features/rbac/README.md`.
-- Entitlements guidance lives in `src/features/entitlements/README.md`.
+- Put net-new feature code under `src/features/<feature>/*`; put broadly
+  reusable components under `src/components/*`.
 - Prefer Shadcn/ui primitives from `src/components/ui`; if a missing component
   must be installed, ask the user before doing so.
 - Tailwind is the default styling layer; use the shared palette and globals in
@@ -126,94 +107,74 @@ changes.
   Add a layer only when an overlay must escape the app (else use a Radix
   `*.Portal`) by adding a name to `LAYER_ORDER`. z-index stays local to a layer
   or component (1–2 max), never to escape the app.
-- Public API routes should use
-  `src/features/public-api/server/withMiddlewares.ts`, define strict request and
-  response types in `src/features/public-api/types/*`, add server tests, and
-  update Fern sources when the contract changes.
-- Public eval endpoints should keep the split between reusable `evaluators`
-  and ingestion-scoped `evaluation-rules`; do not leak `EvalTemplate` or
-  `JobConfiguration` naming into the public contract.
-- Keep tests independent; in `src/__tests__/server/**`, prefer scoped cleanup or
-  unique test data over global reset helpers.
-- Put pure server unit tests that do not need Postgres bootstrap under
-  `src/__tests__/server/unit/**` so they skip the shared DB setup hook.
-- For small utility functions, prefer Vitest in-source tests when colocated
-  coverage is the simplest option, especially when the test needs access to
-  private implementation details without widening the module API.
-- Do not extract private utility functions into separate files only to make
-  them testable. Keep them local unless the user explicitly asks for extraction
-  or the utility is meaningfully reused.
+- Public API endpoints are implemented in `../langfuse-rs/crates/langfuse-api/`,
+  not here. The web side only consumes them through `src/utils/api.ts`.
+
+## Tests
+
+- Client tests: `src/**/*.clienttest.ts(x)` (`pnpm --filter web run test-client`).
+- In-source tests: `vitest` blocks inside a module
+  (`pnpm --filter web run test:in-source`).
+- E2E: `src/__e2e__/*` (`pnpm --filter web run test:e2e` for Playwright specs,
+  `test:e2e:server` for the vitest-driven suite).
+- Server tests (`src/__tests__/server/**`, `*.servertest.ts`) were removed with
+  the backend. The vitest `server*` projects still exist in `vitest.config.mts`
+  and match nothing; `pnpm --filter web run test` therefore reports no tests for
+  them.
+- Keep tests independent; no reliance on test execution order.
+- Confirm the target `*.clienttest.*` file exists before passing a pattern to
+  `vitest run`; source files do not always have a matching colocated test file.
+- When passing a Vitest file or pattern through `pnpm --filter web ...`, make it
+  relative to `web/` because the script runs with `web` as the working
+  directory. Example: use `src/features/search-bar/lib/validate.clienttest.ts`,
+  not `web/src/...`.
+- Prefer separate test files for components and integration coverage; use Vitest
+  in-source tests mainly for small-scoped utilities.
+- Do not extract private utility functions into separate files only to make them
+  testable. Keep them local unless the user explicitly asks for extraction or the
+  utility is meaningfully reused.
 
 ## Quick Commands
 
 - Dev: `pnpm --filter web run dev`
-- Lint: `pnpm --filter web run lint`
+- Lint: `pnpm --filter web run lint` (fails on any warning — `--max-warnings 0`)
 - Lint fix: `pnpm --filter web run lint:fix`
-- Typecheck: `pnpm --filter web run typecheck`
-- Server tests: `pnpm --filter web run test <args>`
-- In-source tests: `pnpm --filter web run test:in-source <args>`
+- Typecheck: `pnpm --filter web run typecheck` (see Known Issues: ~385 errors)
 - Client tests: `pnpm --filter web run test-client <args>`
+- In-source tests: `pnpm --filter web run test:in-source <args>`
 - E2E tests: `pnpm --filter web run test:e2e`
-- Agent browser install to the default user-level Playwright cache: `pnpm run playwright:install`
 - Build: `pnpm --filter web run build`
+- Storybook: `pnpm --filter web run storybook`
 
 ## Playbooks
 
-### Add/Change tRPC endpoint
+### Add a backend call
 
-1. Implement router/procedure in `src/server/api/routers/*` or
-   `src/features/<feature>/server/*`.
-2. Register in `src/server/api/root.ts`.
-3. Reuse auth/error patterns from `src/server/api/trpc.ts`.
-4. Add/adjust server tests under `src/__tests__/server/*`.
+1. Confirm the Rust route exists in `../langfuse-rs/crates/langfuse-api/src/routes/`.
+2. If `src/utils/api.ts` does not already route that resource, add it to
+   `REAL_RESOURCES` (or a real-proc branch) — do not rely on the placeholder.
+3. Call it through `api.<resource>.<procedure>` so query keys and invalidation
+   keep working.
 
-### Add/Change public API endpoint
-
-1. Add route in `src/pages/api/public/*`.
-2. Define/update contract types in `src/features/public-api/types/*`.
-3. Add/adjust server tests in `src/__tests__/server/*`.
-4. If API contract changed, update Fern source (`../fern/apis/**`) and regenerate
-   outputs (do not hand-edit `../generated/**`).
-
-### Error handling (tRPC + REST)
-
-1. Throw `BaseError` subclasses (eg `LangfuseNotFoundError`) from handlers and services.
-2. Let `BaseError`s bubble up to the tRPC and REST middlewares (eg. don't `try/catch` and rethrow in to `TRPCError` the handler)
-3. Extend the `BaseError` or its subclasses in [`packages/shared/src/errors/`](../packages/shared/src/errors/) as needed.
-
-### Add frontend feature
+### Add a frontend feature
 
 1. Prefer `src/features/<feature>/*` for feature-local code.
 2. Put broadly reusable components in `src/components/*`.
-3. Keep server logic near feature server folders when possible.
-4. Review the affected user flow in a real browser with the Playwright MCP
-   server before signoff. Use
-   `../.agents/skills/frontend-browser-review/SKILL.md`.
+3. Review the affected user flow in a real browser before signoff — see the
+   shared browser-review workflow in
+   [`../.agents/skills/frontend-browser-review/SKILL.md`](../.agents/skills/frontend-browser-review/SKILL.md).
+   For large features, virtualized lists, or local state architecture also read
+   [`../.agents/skills/frontend-large-feature-architecture/SKILL.md`](../.agents/skills/frontend-large-feature-architecture/SKILL.md).
 
-### Agent browser loop
+### Error handling
 
-1. Start the Rust backend first: `cd langfuse-rs && cargo run --bin server --release`
-   (or use pre-built binary: `./target/release/server`).
-2. Start the frontend with `pnpm run dev:web` unless an existing local server is already running.
-3. Install Chromium with `pnpm run playwright:install` if Playwright has not been set up on this machine yet.
-4. Use the workspace `playwright` MCP server from `.mcp.json`, `.cursor/mcp.json`, or `.vscode/mcp.json` for browser-driven review of user-visible frontend changes, not just debugging.
-5. Exercise the primary changed flow and check the resulting UI state for obvious visual regressions before signoff.
-6. Inspect traces and other artifacts under `/tmp/playwright-mcp` when a browser session fails.
+1. Throw `BaseError` subclasses (e.g. `LangfuseNotFoundError`) and let the
+   caller surface them; extend `../packages/shared/src/errors/` as needed.
+2. `src/utils/trpcErrorToast.tsx` renders the toast for failed queries.
 
 ## Package-Specific Rules
 
 - Router style is Pages Router-centric; follow existing routing patterns.
 - In `src/pages`, do not keep both `foo.ts(x)` and a `foo/` folder. If the
   folder exists, put the route implementation in `foo/index.ts(x)` instead.
-- Keep tests independent; no reliance on test execution order.
-- Confirm the target `*.clienttest.*` or `*.servertest.*` file exists before passing a pattern to `vitest run`; source files do not always have a matching colocated test file.
-- When passing a Vitest file or pattern through `pnpm --filter web ...`, make it
-  relative to `web/` because the script runs with `web` as the working
-  directory. Example: use `src/features/widgets/chart-library/BigNumber.tsx`,
-  not `web/src/features/widgets/chart-library/BigNumber.tsx`.
-- Prefer separate test files for components, integration coverage, and broader
-  behaviors; use Vitest in-source tests mainly for small-scoped utilities.
-- Run Vitest in-source utility coverage with `pnpm --filter web run test:in-source`;
-  do not try to target these through `test-client` or by assuming a separate
-  `*.clienttest.*`/`*.servertest.*` file exists.
 - Do not hand-edit build artifacts: `.next/*`, `.next-check/*`, `dist/*`.
