@@ -3,7 +3,7 @@
 本项目是 [Langfuse](https://langfuse.com) 的魔改分支：
 - **存储层**：所有后端存储统一迁移到 PostgreSQL（ClickHouse/S3/Redis 已移除）
 - **后端层**：队列消费者和 API Server 由 Rust (axum + sqlx) 实现，内存仅 ~7MB RSS
-- **前端层**：Next.js 保留为纯前端 + SSR 渲染层 + Pages Router API 路由 (NextAuth auth 等)
+- **前端层**：Next.js 仅作 UI + SSR 渲染层，不含任何 API 路由（数据请求经 `next.config.mjs` 的 rewrites 代理到 Rust，并由 `web/src/utils/api.ts` 统一封装）
 
 ## 本地环境
 
@@ -127,9 +127,11 @@ btrace/
 - Rust tests: `cd langfuse-rs && cargo test --workspace`
 - Rust lint: `cd langfuse-rs && cargo clippy`
 - Container build: `docker build -t btrace .` (context is the repo root).
-  The image compiles `packages/shared` + `ee` and runs `prisma generate` itself —
+  The image compiles `packages/shared` and runs `prisma generate` itself —
   `.dockerignore` keeps host `dist/` out of the context, so without those steps
-  `next build` cannot resolve their exports.
+  `next build` cannot resolve its exports. The same is true locally: after
+  deleting `packages/shared/dist`, run `pnpm --filter @langfuse/shared run build`
+  or `next dev` fails with `Can't resolve '@langfuse/shared'`.
 - Container run: see `docs/lexqa-integration.md` §3 — needs `DATABASE_URL` plus
   the `SALT` the API keys were hashed with
 - Lint all: `pnpm run lint`
@@ -159,14 +161,14 @@ names a command or file that reproduces the claim — check it before assuming t
 entry is stale.
 
 1. **Neither web nor shared typechecks or lints cleanly.** `npx tsc -p
-   web/tsconfig.build.json --noEmit --skipLibCheck` reports ~385 errors
+   web/tsconfig.build.json --noEmit --skipLibCheck` reports ~330 errors
    (`pnpm run typecheck` delegates to the same config via tsgo), dominated by
    TS7006 (implicit `any` at call sites) because `web/src/utils/api.ts` returns
    `any` from its tRPC-shaped proxy. `pnpm run lint` exits 1 on
-   `--max-warnings 0`: 8 warnings in web (`src/pages/auth/sign-in.tsx`,
-   `sign-up.tsx`, `src/pages/project/[projectId]/settings/index.tsx`,
-   `src/utils/api.ts`) and 32 in `packages/shared`. All of them predate this
-   cleanup; none are in files the cleanup touched. `Dockerfile` sets
+   `--max-warnings 0`: 7 warnings in web (`src/pages/auth/sign-in.tsx`,
+   `sign-up.tsx`, `src/utils/api.ts`) and 32 in `packages/shared`. The cleanup
+   took web from 759 type errors and 13 warnings to these numbers; what remains
+   all predates it and none sits in a file the cleanup touched. `Dockerfile` sets
    `NEXT_IGNORE_BUILD_ERRORS=true` so image builds do not fail on the type
    errors. Error counts are only meaningful when compared as a set — line shifts
    make identical errors look new, so diff on (file, message) instead.
