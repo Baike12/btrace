@@ -128,3 +128,11 @@ web/test-results/*
 
 # Superset config
 .superset/
+
+# Editor / macOS artifacts. These are never project assets: `*.bak` files are
+# what a rename-to-disable leaves behind, and `* copy/` is what macOS makes when
+# a folder is duplicated. The pre-commit hook rejects them if they are staged.
+*.bak
+*.orig
+*.rej
+* copy/

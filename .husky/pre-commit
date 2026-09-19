@@ -1,2 +1,19 @@
 #!/bin/sh
-exit 0
+# Reject staged backup artifacts and build output. This is a path blocklist
+# only — it does not run lint or typecheck, so it stays fast.
+#
+# Deliberately does NOT match `bin/`: `langfuse-rs/bin/` holds the Rust binary
+# sources (server.rs, worker.rs) and must stay committable. Only
+# `node_modules/.bin` is generated, and node_modules is ignored anyway.
+#
+# Root-level `*.png` only: images under web/public/** are real assets.
+bad=$(git diff --cached --name-only --diff-filter=ACM | grep -E \
+  '(\.(bak|orig|rej)$)|( copy/)|(^|/)(target|\.next|\.next-check|\.turbo|dist|\.playwright-cli|\.playwright-mcp)/|^[^/]*\.png$' \
+  || true)
+
+[ -z "$bad" ] && exit 0
+
+echo "Refusing to commit backup or generated paths:" >&2
+echo "$bad" | sed 's/^/  /' >&2
+echo "If a file is genuinely source, rename it to something meaningful." >&2
+exit 1
