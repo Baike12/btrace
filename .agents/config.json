@@ -22,10 +22,6 @@
     "langfuse-docs": {
       "transport": "http",
       "url": "https://langfuse.com/api/mcp"
-    },
-    "linear": {
-      "transport": "http",
-      "url": "https://mcp.linear.app/mcp"
     }
   },
   "claude": {

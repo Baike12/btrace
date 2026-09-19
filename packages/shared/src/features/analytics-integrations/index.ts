@@ -8,8 +8,6 @@ import {
   type ObservationFieldGroupFull,
 } from "../../domain/observation-field-groups";
 
-export * from "./blob-export-gate";
-
 export const EXPORT_SOURCE_OPTIONS: Array<{
   value: AnalyticsIntegrationExportSource;
   label: string;

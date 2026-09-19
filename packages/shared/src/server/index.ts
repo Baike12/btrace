@@ -1,7 +1,3 @@
-// PG-only: re-export redis stub for backward compat with modules that still
-// reference the `redis` variable directly (not via import)
-export { redis } from "./redis/redis";
-
 // S3/Storage — removed for PG-only fork
 export * from "./pg-queue/PgQueue";
 export * from "./pg-queue/queueRegistry";
@@ -16,15 +12,6 @@ export * from "./pg-queue/queues/entityChangeQueue";
 export * from "./pg-queue/queues/traceUpsertQueue";
 export * from "./ingestion/eventBucketPath";
 export * from "./cache";
-export * from "./services/email/transport";
-export * from "./services/email/organizationInvitation/sendMembershipInvitationEmail";
-export * from "./services/email/batchExportSuccess/sendBatchExportSuccessEmail";
-export * from "./services/email/passwordReset/sendResetPasswordVerificationRequest";
-export * from "./services/email/cloudSpendAlert/sendCloudSpendAlertEmail";
-export * from "./services/email/usageThresholdWarning/sendUsageThresholdWarningEmail";
-export * from "./services/email/usageThresholdSuspension/sendUsageThresholdSuspensionEmail";
-export * from "./services/email/commentMention/sendCommentMentionEmail";
-export * from "./services/email/blobStorageExportFailed/sendBlobStorageExportFailedEmail";
 export * from "./services/PromptService";
 export * from "./services/PromptService/types";
 export * from "./services/traces-ui-table-service";
@@ -58,7 +45,6 @@ export * from "./outbound-url";
 export * from "./llm/getInternalTracingHandler";
 export * from "./utils/DatabaseReadStream";
 export * from "./utils/transforms";
-export * from "./utils/billingCycleHelpers";
 export * from "./utils/compareVersions";
 export * from "./otel/utils";
 export { queryPg } from "./repositories/pg";
@@ -98,12 +84,10 @@ export * from "./services/DashboardService";
 export * from "./services/TableViewService";
 export * from "./services/DefaultViewService";
 export * from "./services/DefaultEvaluationModelService";
-export * from "./services/blockEvaluatorConfigs";
 export * from "./services/getProjectAdminEmails";
 // ClickHouse/S3 — removed for PG-only fork
 export * from "./services/SlackService";
 export * from "./tableMappings";
-export * from "./otel";
 export * from "./datasets/executeWithDatasetServiceStrategy";
 
 // data-deletion, media-deletion, s3, addToDeleteQueue — removed for PG-only fork
