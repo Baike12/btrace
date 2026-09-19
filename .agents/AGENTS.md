@@ -211,7 +211,28 @@ entry is stale.
    wires them up. Until it is fixed, seed test data by hand or reuse the
    existing local database.
 
-7. **Four dependencies have no remaining importers**:
+7. **`tsc` is not a reliable gate, because 18 files start with `// @ts-nocheck`.**
+   Errors inside them are invisible to `pnpm run typecheck`, so a broken import
+   there survives every typecheck and only fails when the page is actually
+   loaded. `web/src/pages/project/[projectId]/settings/index.tsx` was carrying a
+   dead `@/src/ee/...` import this way, and 17 more files import
+   `MediaReturnType` / `MediaContentType` from `@/src/features/media/validation`,
+   a module that has never existed in this repo. Those imports are type-only, so
+   they are erased at build time and the pages work; the types are undefined, so
+   anything that tried to *use* the values would not. Audit imports with a
+   resolver (or load the page) rather than trusting tsc alone.
+
+8. **The v4 "Fast (Preview)" tables are unreachable.** `useV4Beta` reads
+   `session.user.v4BetaEnabled` and gates the sidebar toggle on
+   `session.user.canToggleV4`, but `POST /api/auth/session` returns a user
+   object of only `admin, email, emailVerified, featureFlags, id, name,
+   organizations` — neither field is present, so both are always `false`. The
+   toggle never renders and the v4 tables, the events search bar and the
+   `api.events.*` calls behind them cannot be reached in this instance.
+   (`users.v4_beta_enabled` exists in Postgres and is `true` for some users; the
+   API just does not surface it.)
+
+9. **Four dependencies have no remaining importers**:
    `@clickhouse/client`, `@aws-sdk/client-sesv2`, `nodemailer` and
    `@types/nodemailer` (the TypeScript email tree and the ClickHouse client
    stub were removed). `ioredis` looks similar but is *not* unused —
