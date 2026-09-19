@@ -12,7 +12,6 @@
 import { memo, useMemo } from "react";
 import {
   type ObservationType,
-  AnnotationQueueObjectType,
   isGenerationLike,
 } from "@langfuse/shared";
 import { type SelectionData } from "@/src/features/comments/contexts/InlineCommentSelectionContext";
@@ -21,9 +20,7 @@ import { ItemBadge } from "@/src/components/ItemBadge";
 import { LocalIsoDate } from "@/src/components/LocalIsoDate";
 import { NewDatasetItemFromExistingObject } from "@/src/features/datasets/components/NewDatasetItemFromExistingObject";
 import { AnnotateDrawer } from "@/src/features/scores/components/AnnotateDrawer";
-import { CreateNewAnnotationQueueItem } from "@/src/features/annotation-queues/components/CreateNewAnnotationQueueItem";
 import { CommentDrawerButton } from "@/src/features/comments/CommentDrawerButton";
-import { JumpToPlaygroundButton } from "@/src/features/playground/page/components/JumpToPlaygroundButton";
 import { PromptBadge } from "@/src/components/trace/components/_shared/PromptBadge";
 import {
   LatencyBadge,
@@ -210,21 +207,7 @@ export const ObservationDetailViewHeader = memo(
                     size="sm"
                   />
                 )}
-                <CreateNewAnnotationQueueItem
-                  projectId={projectId}
-                  objectId={observation.id}
-                  objectType={AnnotationQueueObjectType.OBSERVATION}
-                  size="sm"
-                />
               </div>
-            )}
-            {observationWithIO && isGenerationLike(observationWithIO.type) && (
-              <JumpToPlaygroundButton
-                source="generation"
-                generation={observationWithIO}
-                analyticsEventName="trace_detail:test_in_playground_button_click"
-                size="sm"
-              />
             )}
             <CommentDrawerButton
               projectId={projectId}

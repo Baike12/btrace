@@ -42,8 +42,6 @@ import {
   BatchExportTableName,
   type ObservationType,
   TableViewPresetTableName,
-  BatchActionType,
-  ActionId,
   type TimeFilter,
   type OrderByState,
   type TracingSearchType,
@@ -89,7 +87,6 @@ import { type TableAction } from "@/src/features/table/types";
 import { type DataTablePeekViewProps } from "@/src/components/table/peek";
 import { useScoreColumns } from "@/src/features/scores/hooks/useScoreColumns";
 import { scoreFilters } from "@/src/features/scores/lib/scoreColumns";
-import { AddObservationsToDatasetDialog } from "@/src/features/batch-actions/components/AddObservationsToDatasetDialog/index";
 import useSessionStorage from "@/src/components/useSessionStorage";
 import { buildTraceDetailPath } from "@/src/utils/navigation";
 import { getSafeRedirectPath } from "@/src/utils/redirect";
@@ -591,18 +588,7 @@ export default function ObservationsTable({
     selectionStore: observationsTableStore,
   });
 
-  const tableActions: TableAction[] = [
-    {
-      id: ActionId.ObservationAddToDataset,
-      type: BatchActionType.Create,
-      label: "Add to Dataset",
-      description: "Add selected observations to a dataset",
-      customDialog: true,
-      accessCheck: {
-        scope: "datasets:CUD",
-      },
-    },
-  ];
+  const tableActions: TableAction[] = [];
 
   const enableSorting = !hideControls;
 
@@ -1485,16 +1471,6 @@ export default function ObservationsTable({
           />
         )}
       </div>
-
-      <ObservationsAddToDatasetDialog
-        projectId={projectId}
-        rows={rows}
-        backendFilterState={backendFilterState}
-        orderByState={orderByState}
-        searchQuery={searchQuery}
-        searchType={searchType}
-        totalCount={totalCount}
-      />
     </>
   );
 
@@ -1568,11 +1544,6 @@ function ObservationsDataTableToolbar({
             tableName={BatchExportTableName.Observations}
             selectedCount={selectedObservationCount}
             onClearSelection={actions.clearSelection}
-            onCustomAction={(actionType) => {
-              if (actionType === ActionId.ObservationAddToDataset) {
-                actions.setShowAddToDatasetDialog(true);
-              }
-            }}
           />
         ) : null,
       ]}
@@ -1583,62 +1554,6 @@ function ObservationsDataTableToolbar({
         setRowSelection: actions.setRowSelection,
         totalCount,
         ...paginationState,
-      }}
-    />
-  );
-}
-
-function ObservationsAddToDatasetDialog({
-  backendFilterState,
-  orderByState,
-  projectId,
-  rows,
-  searchQuery,
-  searchType,
-  totalCount,
-}: {
-  backendFilterState: FilterState;
-  orderByState: OrderByState;
-  projectId: string;
-  rows: ObservationsTableRow[];
-  searchQuery: string | null;
-  searchType: TracingSearchType[];
-  totalCount: number | null;
-}) {
-  const showAddToDatasetDialog = useObservationsTableStore(
-    (state) => state.showAddToDatasetDialog,
-  );
-  const selectedObservationIds = useObservationsTableStore(
-    (state) => state.selectedPageRowIds,
-  );
-  const selectAll = useObservationsTableStore((state) => state.selectAll);
-  const actions = useObservationsTableStore((state) => state.actions);
-
-  if (!showAddToDatasetDialog) return null;
-
-  const firstId = selectedObservationIds[0];
-  const firstRow = rows.find((row) => row.id === firstId);
-
-  return (
-    <AddObservationsToDatasetDialog
-      projectId={projectId}
-      selectedObservationIds={selectedObservationIds}
-      query={{
-        filter: backendFilterState,
-        orderBy: orderByState,
-        searchQuery: searchQuery ?? undefined,
-        searchType,
-      }}
-      selectAll={selectAll}
-      totalCount={totalCount ?? 0}
-      onClose={() => {
-        actions.setShowAddToDatasetDialog(false);
-        actions.clearSelection();
-      }}
-      exampleObservation={{
-        id: firstRow?.id ?? "",
-        traceId: firstRow?.traceId ?? "",
-        startTime: firstRow?.timestamp ?? undefined,
       }}
     />
   );

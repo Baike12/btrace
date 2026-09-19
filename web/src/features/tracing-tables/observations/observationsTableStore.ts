@@ -6,14 +6,12 @@ type RowSelectionUpdater = Updater<RowSelectionState>;
 type BooleanUpdater = Updater<boolean>;
 
 export interface ObservationsTableStoreState extends TableSelectionStoreState {
-  showAddToDatasetDialog: boolean;
   actions: TableSelectionStoreState["actions"] & {
     syncPageRows: (payload: {
       pageRowIds: string[];
       totalCount: number | null;
     }) => void;
     syncSelectAll: (selectAll: boolean) => void;
-    setShowAddToDatasetDialog: (isOpen: boolean) => void;
   };
 }
 
@@ -89,7 +87,6 @@ export function createObservationsTableStore({
       selectedPageRowIds: [],
       pageRowIds: [],
       totalCount: null,
-      showAddToDatasetDialog: false,
       actions: {
         setRowSelection: (updater: RowSelectionUpdater) => {
           updateSelection(resolveUpdater(updater, get().rowSelection));
@@ -125,9 +122,6 @@ export function createObservationsTableStore({
           if (selectAll !== get().selectAll) {
             set({ selectAll });
           }
-        },
-        setShowAddToDatasetDialog: (isOpen: boolean) => {
-          set({ showAddToDatasetDialog: isOpen });
         },
       },
     };

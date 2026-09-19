@@ -51,7 +51,7 @@ import { usePeekTableState } from "@/src/components/table/peek/contexts/PeekTabl
 import useColumnOrder from "@/src/features/column-visibility/hooks/useColumnOrder";
 import { BatchExportTableButton } from "@/src/components/BatchExportTableButton";
 import { BreakdownTooltip } from "@/src/components/trace/components/_shared/BreakdownToolTip";
-import { InfoIcon, LightbulbIcon, PlusCircle } from "lucide-react";
+import { InfoIcon, PlusCircle } from "lucide-react";
 import { UpsertModelFormDialog } from "@/src/features/models/components/UpsertModelFormDialog";
 import { LocalIsoDate } from "@/src/components/LocalIsoDate";
 import { Badge } from "@/src/components/ui/badge";
@@ -97,8 +97,6 @@ import {
 } from "@/src/components/table/data-table-refresh-button";
 import useSessionStorage from "@/src/components/useSessionStorage";
 import { api } from "@/src/utils/api";
-import { RunEvaluationDialog } from "@/src/features/batch-actions/components/RunEvaluationDialog/index";
-import { AddObservationsToDatasetDialog } from "@/src/features/batch-actions/components/AddObservationsToDatasetDialog/index";
 import { useHasEntitlement } from "@/src/features/entitlements/hooks";
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { useSearchBarEnabled } from "@/src/features/search-bar/hooks/useSearchBarEnabled";
@@ -213,8 +211,6 @@ export default function ObservationsEventsTable({
     useFullTextSearch();
 
   const { selectAll, setSelectAll } = useSelectAll(projectId, "observations");
-  const [showRunEvaluationDialog, setShowRunEvaluationDialog] = useState(false);
-  const [showAddToDatasetDialog, setShowAddToDatasetDialog] = useState(false);
 
   const [paginationState, setPaginationState] = usePaginationState(1, 50);
 
@@ -638,27 +634,6 @@ export default function ObservationsEventsTable({
           } as TableAction,
         ]
       : []),
-    {
-      id: ActionId.ObservationAddToDataset,
-      type: BatchActionType.Create,
-      label: "Add to Dataset",
-      description: "Add selected observations to a dataset",
-      customDialog: true,
-      accessCheck: {
-        scope: "datasets:CUD",
-      },
-    },
-    {
-      id: ActionId.ObservationBatchEvaluation,
-      type: BatchActionType.Create,
-      label: "Evaluate",
-      description: "Run evaluations on selected observations.",
-      customDialog: true,
-      icon: <LightbulbIcon className="h-4 w-4 sm:mr-2" />,
-      accessCheck: {
-        scope: "evalJob:CUD",
-      },
-    },
   ];
 
   const enableSorting = !hideControls;
@@ -1438,16 +1413,6 @@ export default function ObservationsEventsTable({
       ? totalCount
       : selectedObservationIds.length;
 
-  const exampleObservation = useMemo(() => {
-    const firstId = selectedObservationIds[0];
-    const firstObs = observations.rows?.find((o) => o.id === firstId);
-    return {
-      id: firstObs?.id ?? "",
-      traceId: firstObs?.traceId ?? "",
-      startTime: firstObs?.startTime ?? undefined,
-    };
-  }, [selectedObservationIds, observations.rows]);
-
   return (
     <DataTableControlsProvider tableName={eventsFilterConfig.tableName}>
       <div className="flex h-full w-full flex-col">
@@ -1560,14 +1525,6 @@ export default function ObservationsEventsTable({
                     onClearSelection={() => {
                       setSelectedRows({});
                       setSelectAll(false);
-                    }}
-                    onCustomAction={(actionType) => {
-                      if (actionType === ActionId.ObservationBatchEvaluation) {
-                        setShowRunEvaluationDialog(true);
-                      }
-                      if (actionType === ActionId.ObservationAddToDataset) {
-                        setShowAddToDatasetDialog(true);
-                      }
                     }}
                   />
                 ) : null,
@@ -1704,48 +1661,6 @@ export default function ObservationsEventsTable({
           />
         )}
       </div>
-
-      {showRunEvaluationDialog && (
-        <RunEvaluationDialog
-          projectId={projectId}
-          selectedObservationIds={selectedObservationIds}
-          query={{
-            filter: filterState,
-            orderBy: orderByState,
-            searchQuery: searchQuery ?? undefined,
-            searchType,
-          }}
-          selectAll={selectAll}
-          totalCount={totalCount ?? 0}
-          onClose={() => {
-            setShowRunEvaluationDialog(false);
-            setSelectedRows({});
-            setSelectAll(false);
-          }}
-          exampleObservation={exampleObservation}
-        />
-      )}
-
-      {showAddToDatasetDialog && (
-        <AddObservationsToDatasetDialog
-          projectId={projectId}
-          selectedObservationIds={selectedObservationIds}
-          query={{
-            filter: filterState,
-            orderBy: orderByState,
-            searchQuery: searchQuery ?? undefined,
-            searchType,
-          }}
-          selectAll={selectAll}
-          totalCount={totalCount ?? 0}
-          onClose={() => {
-            setShowAddToDatasetDialog(false);
-            setSelectedRows({});
-            setSelectAll(false);
-          }}
-          exampleObservation={exampleObservation}
-        />
-      )}
     </DataTableControlsProvider>
   );
 }
