@@ -2,7 +2,6 @@ packages:
   # include packages in subfolders (e.g. apps/ and packages/)
   - "web"
   - "packages/**"
-  - "ee"
 # 5 day delay for new dep upgrades to reduce supply chain attack risk
 minimumReleaseAge: 7200
 # the exclusions are temporary so that we can set the 5 day limit without downgrading packages.

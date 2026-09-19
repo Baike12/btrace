@@ -59,7 +59,6 @@ COPY pnpm-workspace.yaml pnpm-lock.yaml package.json turbo.json ./
 COPY patches/ ./patches/
 COPY web/package.json ./web/
 COPY packages/ ./packages/
-COPY ee/ ./ee/
 
 RUN pnpm install --frozen-lockfile
 
@@ -71,12 +70,12 @@ RUN cd packages/shared \
     && DATABASE_URL="postgresql://unused:unused@127.0.0.1:5432/unused" \
        npx prisma generate --no-hints
 
-# `@langfuse/shared` and `@langfuse/ee` are consumed through their build output
-# (`main` is `./dist/src/index.js`), and `.dockerignore` deliberately keeps host
-# build artifacts out of the context — so they must be compiled here. Without
-# this, `next build` fails to resolve their exports (~210 "export not found"
-# errors) because `dist/` does not exist in the image.
-RUN pnpm --filter @langfuse/shared --filter @langfuse/ee run build
+# `@langfuse/shared` is consumed through its build output (`main` is
+# `./dist/src/index.js`), and `.dockerignore` deliberately keeps host build
+# artifacts out of the context — so it must be compiled here. Without this,
+# `next build` fails to resolve its exports (~210 "export not found" errors)
+# because `dist/` does not exist in the image.
+RUN pnpm --filter @langfuse/shared run build
 
 COPY web/ ./web/
 
