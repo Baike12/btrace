@@ -128,7 +128,7 @@ export const getProjectSettingsPages = ({
     ),
   },
   {
-    title: "MCP & CLI",
+    title: "Developer Tools",
     slug: "developer-tools",
     cmdKKeywords: [
       "mcp",

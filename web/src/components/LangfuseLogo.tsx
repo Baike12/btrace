@@ -14,7 +14,7 @@ export const LangfuseIcon = ({
     src={`${env.NEXT_PUBLIC_BASE_PATH ?? ""}/icon.svg`}
     width={size}
     height={size}
-    alt="Langfuse Icon"
+    alt="btrace Icon"
     className={className}
   />
 );
@@ -26,13 +26,13 @@ const LangfuseLogotype = () => {
       <img
         className="-ml-1.5 max-h-6 max-w-22 group-data-[collapsible=icon]:hidden dark:hidden"
         src={`${env.NEXT_PUBLIC_BASE_PATH ?? ""}/wordart-black.svg`}
-        alt="Langfuse Logo"
+        alt="btrace Logo"
       />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         className="-ml-1.5 hidden max-h-6 max-w-22 group-data-[collapsible=icon]:hidden dark:block"
         src={`${env.NEXT_PUBLIC_BASE_PATH ?? ""}/wordart-white.svg`}
-        alt="Langfuse Logo"
+        alt="btrace Logo"
       />
       <LangfuseIcon
         size={28}
@@ -45,7 +45,7 @@ const LangfuseLogotype = () => {
 export const LangfuseLogo = ({ version = false }: { version?: boolean }) => {
   return (
     <div className="-mt-2 ml-1 flex flex-wrap gap-4 lg:flex-col lg:items-start">
-      {/* Langfuse Logo */}
+      {/* btrace Logo */}
       <div className="flex items-center">
         <Link href="/" className="flex items-center">
           <LangfuseLogotype />

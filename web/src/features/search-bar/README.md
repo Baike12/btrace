@@ -7,7 +7,7 @@ sidebar's `FilterState` (+ the table's full-text search) remains the single
 source of truth; the bar reads from and writes to it. Only the legacy toolbar
 search field is replaced (full-text search goes inline in the bar).
 Generally available on the v4 events tables (no opt-in). Based on the
-`langfuse-search-bar` prototype.
+`btrace-search-bar` prototype.
 
 ## Enablement
 
@@ -249,7 +249,7 @@ filterable view, not just the v4 events table. That is cheap _by design_ — but
 only if new views extend it through the seam below instead of forking the
 grammar. Read this before adding a second view.
 
-**Why it's cheap: the back half is already universal.** Langfuse has ~15
+**Why it's cheap: the back half is already universal.** btrace has ~15
 filterable views (traces, sessions, observations, events v4, scores, prompts,
 users, monitors, evaluators, eval-logs, experiments, experiment-items,
 datasets…). Every one of them already rides ONE pipeline:

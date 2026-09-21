@@ -481,7 +481,7 @@ export class SlackService {
           params.text ||
           (params.blocks?.length || params.attachments?.length
             ? undefined
-            : "Langfuse Notification"),
+            : "btrace Notification"),
         unfurl_links: false,
         unfurl_media: false,
       });

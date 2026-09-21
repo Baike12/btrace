@@ -10,7 +10,7 @@ export function HostNameProject() {
       <Card className="mb-4 p-3">
         <div className="">
           <div className="mb-2 text-sm">
-            When connecting to Langfuse, use this hostname / baseurl.
+            When connecting to btrace, use this hostname / baseurl.
           </div>
           <CodeView
             content={`${window.origin}${env.NEXT_PUBLIC_BASE_PATH ?? ""}`}

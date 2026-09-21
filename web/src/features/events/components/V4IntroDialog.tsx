@@ -19,13 +19,13 @@ export function V4IntroDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onDismiss()}>
       <DialogContent
         className="[&>div:last-child]:hidden"
-        aria-label="Welcome to a faster Langfuse"
+        aria-label="Welcome to a faster btrace"
       >
         <DialogBody>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/assets/v4-beta-intro.jpg"
-            alt="Langfuse gets Faster — performance comparison showing 5x to 165x speedups"
+            alt="btrace gets Faster — performance comparison showing 5x to 165x speedups"
             className="w-full rounded-md"
           />
           <ul className="flex flex-col gap-3">

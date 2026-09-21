@@ -27,66 +27,13 @@ type SidebarNotification = {
   ttlMs?: number;
 };
 
-export const notifications: SidebarNotification[] = [
-  {
-    id: "lw5-1",
-    title: "Launch Week: Day 1",
-    description:
-      "Run experiments inside GitHub Actions to test every PR against a Langfuse dataset.",
-    link: "https://langfuse.com/changelog/2026-05-25-experiment-ci-cd-gates",
-    linkTitle: "Learn more",
-    createdAt: "2026-05-25",
-  },
-  {
-    id: "lw5-2",
-    title: "Launch Week: Day 2",
-    description:
-      "Langfuse agent skill turns Langfuse into a headless platform to evaluate, query and instrument your application.",
-    link: "https://langfuse.com/changelog/2026-05-26-langfuse-agent-skill",
-    linkTitle: "Learn more",
-    createdAt: "2026-05-26",
-  },
-  {
-    id: "lw5-3",
-    title: "Launch Week: Day 3",
-    description: "Fast full-text search on observation I/O via the UI and API",
-    link: "https://langfuse.com/changelog/2026-05-27-clickhouse-full-text-search-fast-mode",
-    linkTitle: "Learn more",
-    createdAt: "2026-05-27",
-  },
-  {
-    id: "lw5-4",
-    title: "Launch Week: Day 4",
-    description:
-      "Code evaluators let you score observations and experiments with Python/TypeScript checks.",
-    link: "https://langfuse.com/changelog/2026-05-28-code-evaluators",
-    linkTitle: "Learn more",
-    createdAt: "2026-05-28",
-  },
-  {
-    id: "lw5-5",
-    title: "Launch Week: Day 5",
-    description:
-      "Langfuse MCP now covers observations, metrics, scores, datasets, comments, and more.",
-    link: "https://langfuse.com/changelog/2026-05-29-mcp-update",
-    linkTitle: "Learn more",
-    createdAt: "2026-05-29",
-  },
-  {
-    id: "github-star",
-    title: "Star Langfuse",
-    description:
-      "See the latest releases and help grow the community on GitHub",
-    link: "https://github.com/langfuse/langfuse",
-    linkContent: (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        alt="Langfuse GitHub stars"
-        src="https://img.shields.io/github/stars/langfuse/langfuse?label=langfuse&style=social"
-      />
-    ),
-  },
-];
+/**
+ * Upstream Langfuse shipped this list full of its own launch-week announcements
+ * and a GitHub-star promo. btrace has no upstream announcements to make, so the
+ * list is intentionally empty and the stack renders nothing. Add entries here
+ * when this deployment has something to tell its users.
+ */
+export const notifications: SidebarNotification[] = [];
 
 const STORAGE_KEY = "dismissed-sidebar-notifications";
 
@@ -97,7 +44,9 @@ export function SidebarNotifications() {
   // useLocalStorage returns [] on server but real data on client,
   // which can change the visibility of the notification stack.
   const [hydrated, setHydrated] = React.useState(false);
-  React.useEffect(() => { setHydrated(true); }, []);
+  React.useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const [dismissedNotifications, setDismissedNotifications] = useLocalStorage<
     string[]
@@ -118,7 +67,8 @@ export function SidebarNotifications() {
   // After hydration: also filter out dismissed notifications.
   const activeNotifications = hydrated
     ? notifications.filter(
-        (notif) => !dismissedNotifications.includes(notif.id) && !isExpired(notif),
+        (notif) =>
+          !dismissedNotifications.includes(notif.id) && !isExpired(notif),
       )
     : notifications.filter((notif) => !isExpired(notif));
 

@@ -274,7 +274,7 @@ function lowerFilter(
   }
 }
 
-/** AST string op -> Langfuse string filter operator (positive polarity). */
+/** AST string op -> btrace string filter operator (positive polarity). */
 function stringOperatorOf(
   op: FilterNode["op"],
 ): "contains" | "=" | "starts with" | "ends with" | null {

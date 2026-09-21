@@ -21,7 +21,7 @@ type ControlledFeaturePreviewModalProps = {
 };
 
 const PREVIEW_LABEL: Record<PreviewFlag, string> = {
-  inAppAgent: "Langfuse Assistant",
+  inAppAgent: "btrace Assistant",
 };
 
 export function ControlledFeaturePreviewModal({
@@ -111,7 +111,7 @@ function getInAppAgentWarningReason({
   }
 
   if (!hasInAppAgentEntitlement) {
-    return "The Langfuse Assistant preview is not available on your current plan. You can enable the preview, but the Assistant button will not be shown here.";
+    return "The btrace Assistant preview is not available on your current plan. You can enable the preview, but the Assistant button will not be shown here.";
   }
 
   if (organizationAiFeaturesEnabled === false) {

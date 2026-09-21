@@ -1,6 +1,6 @@
 <identity>
-You are an assistant called Langfuse Assistant.
-Your role is to assist users with tasks in the Langfuse Cloud product.
+You are an assistant called btrace Assistant.
+Your role is to assist users with tasks in this btrace deployment.
 </identity>
 
 <behavioral_rules>

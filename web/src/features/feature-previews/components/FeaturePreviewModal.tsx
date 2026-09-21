@@ -50,17 +50,17 @@ export type PreviewState = {
 const PREVIEW_REGISTRY: PreviewRegistryItem[] = [
   {
     flag: "inAppAgent",
-    title: "Langfuse Assistant",
-    sidebarLabel: "Langfuse Assistant",
+    title: "btrace Assistant",
+    sidebarLabel: "btrace Assistant",
     description:
-      "Explore project data, understand connected Langfuse resources, and get practical help while investigating your application.",
+      "Explore project data, understand connected btrace resources, and get practical help while investigating your application.",
     details:
-      "This experimental preview can help you inspect traces and observations, look up related scores or prompts, and answer practical questions while you work in a project. Today, it is most useful for exploring project data and understanding how different Langfuse resources connect. Over time, the goal is to help teams generate insights faster and improve their agentic products with less manual investigation.",
+      "This experimental preview can help you inspect traces and observations, look up related scores or prompts, and answer practical questions while you work in a project. Today, it is most useful for exploring project data and understanding how different btrace resources connect. Over time, the goal is to help teams generate insights faster and improve their agentic products with less manual investigation.",
     feedbackUrl: "https://github.com/orgs/langfuse/discussions/14196",
     illustration: {
       light: inAppAgentLightIllustration,
       dark: inAppAgentDarkIllustration,
-      alt: "Langfuse Assistant connects traces, scores, and prompts to answer project questions.",
+      alt: "btrace Assistant connects traces, scores, and prompts to answer project questions.",
     },
   },
 ];

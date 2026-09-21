@@ -1,8 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { SidebarNotifications, notifications } from "./sidebar-notifications";
 
-const GITHUB_STAR_ID = "github-star";
-
 const mockState = vi.hoisted(() => ({ dismissed: [] as string[] }));
 
 vi.mock("../useLocalStorage", () => ({
@@ -12,21 +10,15 @@ vi.mock("../useLocalStorage", () => ({
 
 describe("SidebarNotifications", () => {
   beforeEach(() => {
-    // Dismiss every notification except the GitHub star one so it surfaces
-    // as the front card regardless of how many launch-week notifications
-    // are added over time.
-    mockState.dismissed = notifications
-      .filter((n) => n.id !== GITHUB_STAR_ID)
-      .map((n) => n.id);
+    mockState.dismissed = [];
   });
 
-  it("renders the GitHub stars badge with social style query params", () => {
-    render(<SidebarNotifications />);
+  it("renders nothing when no notifications are configured", () => {
+    expect(notifications).toHaveLength(0);
 
-    const badge = screen.getByAltText("Langfuse GitHub stars");
-    const src = badge.getAttribute("src");
+    const { container } = render(<SidebarNotifications />);
 
-    expect(src).toContain("style=social");
-    expect(src).not.toContain("&amp;");
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByTitle("Dismiss")).not.toBeInTheDocument();
   });
 });

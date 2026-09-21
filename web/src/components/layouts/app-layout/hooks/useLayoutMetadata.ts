@@ -25,7 +25,7 @@ export function useLayoutMetadata(
     const basePath = env.NEXT_PUBLIC_BASE_PATH ?? "";
 
     // Determine page title from active route
-    const title = activePathName ? `${activePathName} | Langfuse` : "Langfuse";
+    const title = activePathName ? `${activePathName} | btrace` : "btrace";
 
     // SVG for modern browsers, with PNG fallbacks specified via sizes.
     const faviconPath = `${basePath}/icon.svg`;

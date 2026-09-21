@@ -51,6 +51,6 @@ export async function validateLlmConnectionBaseURL(
   });
 
   if (env.NEXT_PUBLIC_LANGFUSE_CLOUD_REGION && url.protocol !== "https:") {
-    throw new Error("Only HTTPS base URLs are allowed on Langfuse Cloud");
+    throw new Error("Only HTTPS base URLs are allowed on btrace Cloud");
   }
 }

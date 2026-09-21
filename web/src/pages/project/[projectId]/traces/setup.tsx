@@ -78,10 +78,10 @@ export const TracingSetup = ({
           status={hasTracingConfigured ? "active" : "pending"}
         />
         <p className="text-muted-foreground mb-4 text-sm">
-          Langfuse relies on OpenTelemetry to instrument your application and
-          export LLM application/agent traces to Langfuse. You can use one of
+          btrace relies on OpenTelemetry to instrument your application and
+          export LLM application/agent traces to btrace. You can use one of
           our SDKs or 50+ framework integrations. Please follow the quickstart
-          in the documentation to add Langfuse to your application.
+          in the documentation to add tracing to your application.
         </p>
         <ActionButton href="https://langfuse.com/docs/observability/get-started">
           Quickstart guide
@@ -129,7 +129,7 @@ export default function TracesSetupPage() {
         title: "Tracing Setup",
         help: {
           description:
-            "Setup tracing to track and analyze your LLM calls. You can create API keys and integrate Langfuse with your application.",
+            "Setup tracing to track and analyze your LLM calls. You can create API keys and integrate btrace with your application.",
           href: "https://langfuse.com/docs/observability/overview",
         },
       }}

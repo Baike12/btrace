@@ -283,7 +283,7 @@ export function negationIssue(
     return null; // `has` is the only pseudo; -has: is valid (missing value)
   }
   if (op === "^" || op === "$") {
-    return `negation of ${label(op)} is not representable in the Langfuse filter contract`;
+    return `negation of ${label(op)} is not representable in the btrace filter contract`;
   }
   if (op === "exact" || op === "=") {
     if (ref.type === "metadata") {
